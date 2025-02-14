@@ -7,7 +7,6 @@ class ItemStudentView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Color.fromARGB(255, 255, 255, 255),
         borderRadius: BorderRadius.circular(5),
         border: Border.all(color: Color(0xFF006BD8)),
       ),

@@ -7,6 +7,8 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Bienvenidos"),),
+      //drawer: Drawer(),
+      endDrawer: Drawer(),
     );
   }
 }
