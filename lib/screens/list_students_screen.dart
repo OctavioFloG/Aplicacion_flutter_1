@@ -4,9 +4,10 @@ import 'package:flutter_application_1/view/item_student_view.dart';
 class ListStudentsScreen extends StatelessWidget {
   const ListStudentsScreen({super.key});
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData.dark(),
       title: 'Material App',
       home: Scaffold(
         appBar: AppBar(

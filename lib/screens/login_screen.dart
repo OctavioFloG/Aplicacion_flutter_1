@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/list_students_screen.dart';
+import 'package:flutter_application_1/utils/global_values.dart';
 import 'package:lottie/lottie.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -10,6 +10,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool isValidating = false;
+
   @override
   Widget build(BuildContext context) {
     final txtUser = TextFormField(
@@ -36,7 +38,19 @@ class _LoginScreenState extends State<LoginScreen> {
           alignment: Alignment.center,
           children: [
             Positioned(
-                top: 250,
+              top: 470,
+              child: ValueListenableBuilder(
+                valueListenable:  GlobalValues.isValidating,
+                builder: (context, value, child){
+                  return value ? CircularProgressIndicator() : Container();
+                },
+              ),
+              // child: isValidating
+              //     ? const CircularProgressIndicator()
+              //     : Container(),
+            ),
+            Positioned(
+                top: 150,
                 height: 250,
                 child: Lottie.asset("assets/tecnm.json")),
             Positioned(
@@ -56,7 +70,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       txtPassword,
                       GestureDetector(
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ListStudentsScreen(),)),
+                          onTap: () {
+                            //isValidating = true;
+                            GlobalValues.isValidating.value = true;
+                            Future.delayed(Duration(milliseconds: 1000)).then(
+                              (value) {
+                                GlobalValues.isValidating.value = false;
+                                Navigator.pushNamed(context, "/dash");
+                              },
+                            );
+                          },
                           child: Image.asset("assets/login-button.png",
                               height: 105))
                     ],
