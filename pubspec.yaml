@@ -80,6 +80,13 @@ flutter:
     - family: ShadeBlue
       fonts:
         - asset: fonts/ShadeBlue-2OozX.ttf
+    - family: Hiatus
+      fonts:
+        - asset: fonts/Hiatus-K7GzA.ttf
+    - family: Montserrat
+      fonts:
+        - asset: fonts/MontserratRegular-RpK6l.otf
+        
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro
