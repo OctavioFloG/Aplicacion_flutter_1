@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -18,6 +20,14 @@ class ViajesScreen2 extends StatelessWidget {
     final Widget searchSvg = SvgPicture.asset(
       "assets/search.svg",
       semanticsLabel: 'Search',
+    );
+    final Widget starSvg = SvgPicture.asset(
+      "assets/star.svg",
+      semanticsLabel: 'Star',
+    );
+    final Widget heartIconSvg = SvgPicture.asset(
+      "assets/heart-icon.svg",
+      semanticsLabel: 'Heart Icon',
     );
 
     return Scaffold(
@@ -257,18 +267,31 @@ class ViajesScreen2 extends StatelessWidget {
             ),
             // === Sección de populares ===
             Column(children: [
-              Row(
-                children: [
-                  Text(
-                    'Popular ',
-                    style: TextStyle(
-                      color: Color(0xFF232323),
-                      fontSize: 18,
-                      fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.w600,
+              Padding(
+                padding: EdgeInsets.only(right: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Popular ',
+                      style: TextStyle(
+                        color: Color(0xFF232323),
+                        fontSize: 18,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  )
-                ],
+                    Text(
+                      'See all',
+                      style: TextStyle(
+                        color: Color(0xFF176EF2),
+                        fontSize: 14,
+                        fontFamily: 'CircularXX',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )
+                  ],
+                ),
               ),
               SizedBox(
                 height: 271,
@@ -276,29 +299,111 @@ class ViajesScreen2 extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   children: [
                     Container(
-                      margin: EdgeInsets.only(top: 12,bottom: 19),
+                      margin: EdgeInsets.only(top: 12, bottom: 19),
                       height: 222,
                       width: 188,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 59, 90, 129),
-                          borderRadius: BorderRadius.circular(24),
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 176, 189, 206),
+                        image: DecorationImage(
+                          image: AssetImage("assets/hotel1.png"),
+                          fit: BoxFit.cover,
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 12, bottom: 12),
+                        child: Column(
+                          spacing: 2,
+                          verticalDirection: VerticalDirection.up,
+                          children: [
+                            // === Estrellas del hotel ===
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                              Padding(
+                                padding: EdgeInsets.only(top: 4),
+                                child: Align(
+                                  alignment: Alignment.bottomLeft,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: Color.fromARGB(254, 86, 82, 77),
+                                      borderRadius: BorderRadius.circular(59),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                          top: 4, bottom: 4, left: 12, right: 12),
+                                      child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            starSvg,
+                                            Text(
+                                              '4.1',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontFamily: 'CircularXX',
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          ]),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Align(
+                                alignment: Alignment.topRight,
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 16),
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: heartIconSvg,
+                                  ),
+                                ),
+                              )
+                            ]),
+                            //=== Nombre del hotel ===
+                            Align(
+                              alignment: Alignment.bottomLeft,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: Color.fromARGB(254, 86, 82, 77),
+                                  borderRadius: BorderRadius.circular(59),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      top: 4, bottom: 4, left: 12, right: 12),
+                                  child: Text(
+                                    'Alley Palace',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontFamily: 'CircularXX',
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    SizedBox(
+                    Container(
                       width: 28,
                     ),
-                    SizedBox(
+                    Container(
                       height: 271,
                       width: 212,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 59, 90, 129),
-                          borderRadius: BorderRadius.circular(24),
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 176, 189, 206),
+                        image: DecorationImage(
+                          image: AssetImage("assets/hotel2.png"),
+                          fit: BoxFit.cover,
                         ),
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
