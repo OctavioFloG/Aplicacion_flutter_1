@@ -19,9 +19,18 @@ class ViajesScreen3 extends StatelessWidget {
       "assets/arrow_down.svg",
       semanticsLabel: 'Arrow Down',
     );
+    final Widget arrowRightSvg = SvgPicture.asset(
+      "assets/arrow_right.svg",
+      semanticsLabel: 'Arrow Right',
+    );
+    final Widget backSvg = SvgPicture.asset(
+      "assets/back.svg",
+      semanticsLabel: 'Back',
+    );
 
     return Scaffold(
       appBar: AppBar(),
+      // === Barra de navegación de abajo ===
       bottomNavigationBar: SizedBox(
         height: 100,
         child: Padding(
@@ -89,10 +98,10 @@ class ViajesScreen3 extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Container(
+                    SizedBox(
                       width: 24,
                       height: 24,
-                      child: FlutterLogo(),
+                      child: arrowRightSvg,
                     ),
                   ],
                 ),
@@ -101,6 +110,7 @@ class ViajesScreen3 extends StatelessWidget {
           ),
         ),
       ),
+      // === Cuerpo Principal ===
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(20),
@@ -122,6 +132,23 @@ class ViajesScreen3 extends StatelessWidget {
                             image: DecorationImage(
                                 image: AssetImage("assets/hotel2.png"),
                                 fit: BoxFit.fitWidth)),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: ShapeDecoration(
+                            color: Color(0xFFF3F8FE),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: backSvg,
+                        ),
                       ),
                     ),
                     Container(
