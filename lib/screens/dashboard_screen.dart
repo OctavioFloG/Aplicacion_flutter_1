@@ -7,8 +7,32 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Bienvenidos"),),
-      //drawer: Drawer(),
-      endDrawer: Drawer(),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(child: 
+             UserAccountsDrawerHeader(
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=35"),
+              ),
+              accountName: Text("Octavio Flores Galvan"),
+              accountEmail: Text("octavio.flores@gmail.com"),
+             )
+            ),
+            ListTile(
+              title: Text("Práctica Figma"),
+              subtitle: Text("Frontend App"),
+<<<<<<< Updated upstream
+              leading: Icon(Icons.design_services),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () => Navigator.pushNamed(context, "/viajes1"),
+=======
+>>>>>>> Stashed changes
+            )
+          ],
+        ),
+      ),
+      //endDrawer: Drawer(),
     );
   }
 }
