@@ -117,11 +117,8 @@ class ViajesScreen2 extends StatelessWidget {
                     ),
                     child: Container(
                       width: MediaQuery.of(context).size.width,
-                      height: 52,
                       padding: const EdgeInsets.only(
-                        top: 16,
                         left: 16,
-                        bottom: 16,
                       ),
                       decoration: ShapeDecoration(
                         color: Color(0xFFF3F8FE),

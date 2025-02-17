@@ -40,8 +40,8 @@ class _LoginScreenState extends State<LoginScreen> {
             Positioned(
               top: 470,
               child: ValueListenableBuilder(
-                valueListenable:  GlobalValues.isValidating,
-                builder: (context, value, child){
+                valueListenable: GlobalValues.isValidating,
+                builder: (context, value, child) {
                   return value ? CircularProgressIndicator() : Container();
                 },
               ),
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Future.delayed(Duration(milliseconds: 1000)).then(
                               (value) {
                                 GlobalValues.isValidating.value = false;
-                                Navigator.pushNamed(context, "/viajes1");
+                                Navigator.pushNamed(context, "/viajes3");
                               },
                             );
                           },
