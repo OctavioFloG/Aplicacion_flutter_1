@@ -22,12 +22,9 @@ class DashboardScreen extends StatelessWidget {
             ListTile(
               title: Text("Práctica Figma"),
               subtitle: Text("Frontend App"),
-<<<<<<< Updated upstream
               leading: Icon(Icons.design_services),
               trailing: Icon(Icons.chevron_right),
               onTap: () => Navigator.pushNamed(context, "/viajes1"),
-=======
->>>>>>> Stashed changes
             )
           ],
         ),
