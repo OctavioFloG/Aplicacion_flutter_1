@@ -23,9 +23,82 @@ class ViajesScreen3 extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       bottomNavigationBar: SizedBox(
-        height: 80,
-        child: Column(
-          children: [],
+        height: 100,
+        child: Padding(
+          padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    'Price',
+                    style: TextStyle(
+                      color: Color(0xFF232323),
+                      fontSize: 12,
+                      fontFamily: 'CircularXX',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    '\$199',
+                    style: TextStyle(
+                      color: Color(0xFF2CD6A3),
+                      fontSize: 24,
+                      fontFamily: 'Montserrat',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  )
+                ],
+              ),
+              Container(
+                width: 223,
+                height: 56,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                decoration: ShapeDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment(-1.00, 0.01),
+                    end: Alignment(1, -0.01),
+                    colors: [Color(0xFF176EF2), Color(0xFF186EEE)],
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  shadows: [
+                    BoxShadow(
+                      color: Color(0x3D0038FF),
+                      blurRadius: 19,
+                      offset: Offset(0, 6),
+                      spreadRadius: 0,
+                    )
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Book Now',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'CircularXX',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      width: 24,
+                      height: 24,
+                      child: FlutterLogo(),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
       body: SingleChildScrollView(
