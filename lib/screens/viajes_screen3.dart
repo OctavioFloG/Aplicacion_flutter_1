@@ -29,7 +29,6 @@ class ViajesScreen3 extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(),
       // === Barra de navegación de abajo ===
       bottomNavigationBar: SizedBox(
         height: 100,
