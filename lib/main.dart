@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/dashboard_screen.dart';
 import 'package:flutter_application_1/screens/list_students_screen.dart';
 import 'package:flutter_application_1/screens/splash_screen.dart';
+import 'package:flutter_application_1/screens/todo_screen.dart';
 import 'package:flutter_application_1/screens/viajes_screen2.dart';
 import 'package:flutter_application_1/screens/viajes_screen1.dart';
 import 'package:flutter_application_1/screens/viajes_screen3.dart';
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
             routes: {
               "/list": (context) => const ListStudentsScreen(),
               "/dash": (context) => const DashboardScreen(),
+              "/todo": (context) => const TodoScreen(),
               // === Práctica 1 ===
               "/viajes1": (context) => const ViajesScreen1(),
               "/viajes2": (context) => const ViajesScreen2(),
