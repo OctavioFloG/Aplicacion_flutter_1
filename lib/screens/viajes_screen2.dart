@@ -237,13 +237,13 @@ class ViajesScreen2 extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: 380,
-                      child:
-                          ListView(scrollDirection: Axis.horizontal, children: [
-                        Column(
-                          children: [
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          height: 190,
+                          child:
+                              ListView(scrollDirection: Axis.horizontal, children: [
                             Row(
                               children: [
                                 ItemRecommendedHotels(),
@@ -260,22 +260,12 @@ class ViajesScreen2 extends StatelessWidget {
                             SizedBox(
                               height: 20,
                             ),
-                            Row(
-                              children: [
-                                ItemRecommendedHotels(),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                ItemRecommendedHotels(),
-                                SizedBox(
-                                  width: 20,
-                                ),
-                                ItemRecommendedHotels()
-                              ],
-                            )
-                          ],
+                          ]),
                         ),
-                      ]),
+                        SizedBox(
+                          height: 60,
+                        )
+                      ],
                     ),
                   ])
                 ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/database/task_databa.dart';
+import 'package:intl/intl.dart';
 
 class TodoScreen extends StatefulWidget {
   const TodoScreen({super.key});
@@ -10,6 +11,11 @@ class TodoScreen extends StatefulWidget {
 
 class _TodoScreenState extends State<TodoScreen> {
   TaskDatabase? database;
+  TextEditingController conTitle = TextEditingController();
+  TextEditingController conDesc = TextEditingController();
+  TextEditingController conDate = TextEditingController();
+  TextEditingController conStts = TextEditingController();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -23,8 +29,9 @@ class _TodoScreenState extends State<TodoScreen> {
       appBar: AppBar(
         title: const Text("TodoList"),
       ),
-      floatingActionButton:
-          FloatingActionButton(onPressed: () => _dialogBuilder(context), child: Icon(Icons.add_task)),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () => _dialogBuilder(context),
+          child: Icon(Icons.add_task)),
       body: FutureBuilder(
           future: database!.SELECTALL(),
           builder: (context, snapshot) {
@@ -65,26 +72,52 @@ class _TodoScreenState extends State<TodoScreen> {
 
   Future<void> _dialogBuilder(BuildContext context) {
     return showDialog(
-      context: context,
-      builder: (context){
-        return AlertDialog(
-          title: Text('Add Task'),
-          content: Column(
-            children: [
-              TextFormField(
-                decoration: InputDecoration(
-                  hintText: "Nombre"
-                ),
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Add Task'),
+            content: SizedBox(
+              height: MediaQuery.of(context).size.height * .3,
+              width: MediaQuery.of(context).size.width * .9,
+              child: ListView(
+                children: [
+                  TextFormField(
+                    controller: conTitle,
+                    decoration: InputDecoration(hintText: "Titulo de la tarea"),
+                  ),
+                  TextFormField(
+                    controller: conDesc,
+                    decoration:
+                        InputDecoration(hintText: 'Descripcion de la tarea'),
+                    maxLines: 3,
+                  ),
+                  TextFormField(
+                    readOnly: true,
+                    controller: conDate,
+                    decoration: InputDecoration(hintText: 'Fecha de la tarea'),
+                    onTap: () async {
+                      DateTime? dateTodo = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(200),
+                          lastDate: DateTime(2100));
+                      if (dateTodo != null) {
+                        String formattedDate =
+                            DateFormat('yyyy-MM-dd').format(dateTodo);
+                        setState(() {
+                          conDate.text = formattedDate;
+                        });
+                      }
+                    },
+                  ),
+                  TextFormField(
+                    controller: conStts,
+                    decoration: InputDecoration(hintText: "Status de la tarea"),
+                  ),
+                ],
               ),
-              TextFormField(
-                decoration: InputDecoration(
-                  hintText: 'descripcion'
-                ),
-              )
-            ],
-          ),
-        );
-      }
-    );
+            ),
+          );
+        });
   }
 }
