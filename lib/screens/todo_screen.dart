@@ -1,3 +1,4 @@
+import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/database/task_databa.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +11,7 @@ class TodoScreen extends StatefulWidget {
 }
 
 class _TodoScreenState extends State<TodoScreen> {
-  TaskDatabase? database;
+  late TaskDatabase database;
   TextEditingController conTitle = TextEditingController();
   TextEditingController conDesc = TextEditingController();
   TextEditingController conDate = TextEditingController();
@@ -33,7 +34,7 @@ class _TodoScreenState extends State<TodoScreen> {
           onPressed: () => _dialogBuilder(context),
           child: Icon(Icons.add_task)),
       body: FutureBuilder(
-          future: database!.SELECTALL(),
+          future: database.SELECTALL(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Text(snapshot.error.toString());
@@ -77,7 +78,7 @@ class _TodoScreenState extends State<TodoScreen> {
           return AlertDialog(
             title: Text('Add Task'),
             content: SizedBox(
-              height: MediaQuery.of(context).size.height * .3,
+              height: MediaQuery.of(context).size.height * .4,
               width: MediaQuery.of(context).size.width * .9,
               child: ListView(
                 children: [
@@ -114,6 +115,26 @@ class _TodoScreenState extends State<TodoScreen> {
                     controller: conStts,
                     decoration: InputDecoration(hintText: "Status de la tarea"),
                   ),
+                  Divider(),
+                  ElevatedButton(
+                      onPressed: () {
+                        database.INSERTAR('todo', {
+                          'titleTodo': conTitle.text,
+                          'dscTodo': conDesc.text,
+                          'dateTodo': conDate.text,
+                          'sttTodo': conStts.text == 1 ? true : false
+                        }).then((value) {
+                          if (value > 0) {
+                            ArtSweetAlert.show(
+                                context: context,
+                                artDialogArgs: ArtDialogArgs(
+                                    type: ArtSweetAlertType.success,
+                                    title: "Exito",
+                                    text: "Datos insertados correctamente"));
+                          }
+                        });
+                      },
+                      child: Text("Guardar"))
                 ],
               ),
             ),
