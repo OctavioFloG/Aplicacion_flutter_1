@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/dashboard_screen.dart';
 import 'package:flutter_application_1/screens/list_students_screen.dart';
+import 'package:flutter_application_1/screens/sign_up_screen.dart';
 import 'package:flutter_application_1/screens/splash_screen.dart';
 import 'package:flutter_application_1/screens/todo_screen.dart';
 import 'package:flutter_application_1/screens/viajes_screen2.dart';
@@ -24,6 +25,8 @@ class MyApp extends StatelessWidget {
               "/list": (context) => const ListStudentsScreen(),
               "/dash": (context) => const DashboardScreen(),
               "/todo": (context) => const TodoScreen(),
+              "/signup": (context) => const SignUpScreen(),
+
               // === Práctica 1 ===
               "/viajes1": (context) => const ViajesScreen1(),
               "/viajes2": (context) => const ViajesScreen2(),

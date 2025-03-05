@@ -122,7 +122,7 @@ class _TodoScreenState extends State<TodoScreen> {
                           'titleTodo': conTitle.text,
                           'dscTodo': conDesc.text,
                           'dateTodo': conDate.text,
-                          'sttTodo': conStts.text == 1 ? true : false
+                          'sttTodo': conStts.text == "1" ? true : false
                         }).then((value) {
                           if (value > 0) {
                             ArtSweetAlert.show(

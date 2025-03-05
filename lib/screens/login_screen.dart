@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 bottom: 50,
                 child: Container(
                   padding: EdgeInsets.all(10),
-                  height: 250,
+                  height: 300,
                   width: MediaQuery.of(context).size.width * .9,
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -81,7 +81,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           },
                           child: Image.asset("assets/login-button.png",
-                              height: 105))
+                              height: 105)),
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, "/signup");
+                          },
+                          child: Text("Registrarse"))
                     ],
                   ),
                 ))
