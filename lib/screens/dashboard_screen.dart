@@ -38,7 +38,7 @@ class DashboardScreen extends StatelessWidget {
                 child: UserAccountsDrawerHeader(
               currentAccountPicture: CircleAvatar(
                 backgroundImage:
-                    NetworkImage("https://i.pravatar.cc/150?img=35"),
+                    AssetImage("assets/default-avatar.jpg"),
               ),
               accountName: Text("Octavio Flores Galvan"),
               accountEmail: Text("octavio.flores@gmail.com"),

@@ -35,7 +35,7 @@ class _SignUpState extends State<SignUpScreen> {
             radius: 60,
             backgroundImage: _image != null
                 ? FileImage(_image!)
-                : const AssetImage('assets/hotel1.png')
+                : const AssetImage('assets/default-avatar.jpg')
                     as ImageProvider,
           ),
           Positioned(
