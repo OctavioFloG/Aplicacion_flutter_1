@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/utils/global_values.dart';
-import 'package:lottie/lottie.dart';
+import 'package:flutter_application_1/database/user_databa.dart';
+import 'package:flutter_application_1/screens/dashboard_screen.dart';
+import 'package:flutter_application_1/screens/sign_up_screen.dart';
+import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:flutter_application_1/utils/session_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,87 +13,109 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isValidating = false;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final UserDatabase _database = UserDatabase();
+  bool _isLogin = true;
 
   @override
   Widget build(BuildContext context) {
-    final txtUser = TextFormField(
-      decoration: InputDecoration(
-          border: OutlineInputBorder(), hintText: "Introduce el usuario"),
-    );
-
-    final txtPassword = TextFormField(
-      obscureText: false,
-      decoration: const InputDecoration(
-          border: OutlineInputBorder(), hintText: "Introduce el password"),
-    );
-
     return Scaffold(
+      appBar: AppBar(
+        title: Text(_isLogin ? 'Login' : 'Registro'),
+      ),
       body: Container(
-        height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(
-            image: DecorationImage(
-          opacity: 0.4,
-          fit: BoxFit.cover,
-          image: AssetImage("assets/wallpaper.jpg"),
-        )),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(
-              top: 470,
-              child: ValueListenableBuilder(
-                valueListenable: GlobalValues.isValidating,
-                builder: (context, value, child) {
-                  return value ? CircularProgressIndicator() : Container();
-                },
-              ),
-              // child: isValidating
-              //     ? const CircularProgressIndicator()
-              //     : Container(),
-            ),
-            Positioned(
-                top: 150,
-                height: 250,
-                child: Lottie.asset("assets/tecnm.json")),
-            Positioned(
-                bottom: 50,
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  height: 300,
-                  width: MediaQuery.of(context).size.width * .9,
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Column(
-                    children: [
-                      txtUser,
-                      SizedBox(
-                        height: 10,
-                      ),
-                      txtPassword,
-                      GestureDetector(
-                          onTap: () {
-                            //isValidating = true;
-                            GlobalValues.isValidating.value = true;
-                            Future.delayed(Duration(milliseconds: 1000)).then(
-                              (value) {
-                                GlobalValues.isValidating.value = false;
-                                Navigator.pushNamed(context, "/dash");
-                              },
-                            );
-                          },
-                          child: Image.asset("assets/login-button.png",
-                              height: 105)),
-                      ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, "/signup");
-                          },
-                          child: Text("Registrarse"))
-                    ],
+          image: DecorationImage(
+            image: AssetImage('assets/wallpaper.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.5),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
                   ),
-                ))
-          ],
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Contraseña',
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () async {
+                    final email = _emailController.text;
+                    final password = _passwordController.text;
+
+                    if (email.isEmpty || password.isEmpty) {
+                      ArtSweetAlert.show(
+                        context: context,
+                        artDialogArgs: ArtDialogArgs(
+                          type: ArtSweetAlertType.warning,
+                          title: "Error",
+                          text: "Por favor complete todos los campos",
+                        ),
+                      );
+                      return;
+                    }
+                    if (_isLogin) {
+                      final userData = await _database.login(email, password);
+                      if (userData != null) {
+                        await SessionManager.setLoginDetails(
+                          email,
+                          nombre: userData['nombre'],
+                          imagePath: userData['imagePath'],
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const DashboardScreen()),
+                        );
+                      } else {
+                        ArtSweetAlert.show(
+                          context: context,
+                          artDialogArgs: ArtDialogArgs(
+                            type: ArtSweetAlertType.danger,
+                            title: "Error",
+                            text: "Credenciales incorrectas",
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: Text(_isLogin ? 'Iniciar Sesión' : 'Registrarse'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SignUpScreen()),
+                    );
+                  },
+                  child: const Text(
+                    "¿No tienes cuenta? Regístrate",
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

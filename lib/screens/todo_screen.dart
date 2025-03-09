@@ -159,7 +159,7 @@ class _TodoScreenState extends State<TodoScreen> {
                       if (idTodo == 0) {
                         database.INSERTAR('todo', {
                           'titleTodo': conTitle.text,
-                          'descTodo': conDesc.text,
+                          'dscTodo': conDesc.text,
                           'dateTodo': conDate.text,
                           'sttTodo': false
                         }).then(

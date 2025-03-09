@@ -52,7 +52,7 @@ class TaskDatabase {
     return con!.delete(table, where: 'idTodo = ?', whereArgs: [idTodo]);
   }
 
-  Future<List<TodoModel>> SELECT() async {
+  Future<List<TodoModel>> SELECTALL() async {
     final con = await database;
     var result = await con!.query('todo');
     return result.map((task) => TodoModel.fromMap(task)).toList();
