@@ -155,58 +155,56 @@ class _TodoScreenState extends State<TodoScreen> {
                 ),
                 Divider(),
                 ElevatedButton(
-                    onPressed: () {
-                      if (idTodo == 0) {
-                        database.INSERTAR('todo', {
-                          'titleTodo': conTitle.text,
-                          'dscTodo': conDesc.text,
-                          'dateTodo': conDate.text,
-                          'sttTodo': false
-                        }).then(
-                          (value) {
-                            if (value > 0) {
-                              GlobalValues.upList.value =
-                                  !GlobalValues.upList.value;
-                              ArtSweetAlert.show(
-                                  context: context,
-                                  artDialogArgs: ArtDialogArgs(
-                                      type: ArtSweetAlertType.success,
-                                      title: 'Mensaje de la App',
-                                      text: 'Datos insertados correctamente'));
-                            }
-                          },
-                        );
-                      } else {
-                        database.UPDATE('todo', {
-                          'idTodo' : idTodo,
-                          'titleTodo': conTitle.text,
-                          'descTodo': conDesc.text,
-                          'dateTodo': conDate.text,
-                          'sttTodo': false
-                        }).then(
-                          (value) {
-                            if (value > 0) {
-                              GlobalValues.upList.value =
-                                  !GlobalValues.upList.value;
-                              ArtSweetAlert.show(
-                                  context: context,
-                                  artDialogArgs: ArtDialogArgs(
-                                      type: ArtSweetAlertType.success,
-                                      title: 'Mensaje de la App',
-                                      text:
-                                          'Datos actualizados correctamente'));
-                            }
-                          },
-                        );
-                      }
+                  onPressed: (){
+                    if( idTodo == 0 ){
+                      database!.INSERTAR('todo', {
+                        'titleTodo' : conTitle.text,
+                        'dscTodo' : conDesc.text,
+                        'dateTodo' : conDate.text,
+                        'sttTodo' : false
+                      }).then((value) {
+                        if( value > 0 ){
+                          GlobalValues.upList.value = !GlobalValues.upList.value;
+                          ArtSweetAlert.show(
+                            context: context, 
+                            artDialogArgs: ArtDialogArgs(
+                              type: ArtSweetAlertType.success,
+                              title: 'Mensaje de la App',
+                              text: 'Datos insertados correctamente'
+                            )
+                          );
+                        }
+                      },);
+                    }else{
+                      database!.UPDATE('todo', {
+                        'idTodo' : idTodo,
+                        'titleTodo' : conTitle.text,
+                        'dscTodo' : conDesc.text,
+                        'dateTodo' : conDate.text,
+                        'sttTodo' : false
+                      }).then((value) {
+                        if( value > 0 ){
+                          GlobalValues.upList.value = !GlobalValues.upList.value;
+                          ArtSweetAlert.show(
+                            context: context, 
+                            artDialogArgs: ArtDialogArgs(
+                              type: ArtSweetAlertType.success,
+                              title: 'Mensaje de la App',
+                              text: 'Datos actualizados correctamente'
+                            )
+                          );
+                        }
+                      },);
+                    }
 
-                      conTitle.text = '';
-                      conDesc.text = '';
-                      conDate.text = '';
-                      conStts.text = '';
-                      Navigator.pop(context);
-                    },
-                    child: Text('Guardar'))
+                    conTitle.text = '';
+                    conDesc.text = '';
+                    conDate.text = '';
+                    conStts.text = '';
+                    Navigator.pop(context);
+                  }, 
+                  child: Text('Guardar')
+                )
               ],
             ),
           ),
