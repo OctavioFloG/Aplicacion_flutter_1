@@ -129,6 +129,19 @@ class _SignUpState extends State<SignUpScreen> {
                   );
                   return;
                 }
+                
+                RegExp expression = RegExp("[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*@[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,5}");
+                if (!expression.hasMatch(_emailController.text)) {
+                  ArtSweetAlert.show(
+                    context: context,
+                    artDialogArgs: ArtDialogArgs(
+                      type: ArtSweetAlertType.warning,
+                      title: "Error",
+                      text: "Correo inválido",
+                    ),
+                  );
+                  return;
+                }
 
                 try {
                   await _database.registerUser(

@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/wallpaper.jpg'),
-            fit: BoxFit.cover,
+            fit: BoxFit.fill,
           ),
         ),
         child: Container(
@@ -37,83 +37,91 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor.withOpacity(0.9), // Más opaco
+                borderRadius: BorderRadius.circular(16),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // Para que solo ocupe el espacio necesario
+                children: [
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Contraseña',
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      labelText: 'Contraseña',
+                      border: OutlineInputBorder(),
+                    ),
+                    obscureText: true,
                   ),
-                  obscureText: true,
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () async {
-                    final email = _emailController.text;
-                    final password = _passwordController.text;
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final email = _emailController.text;
+                      final password = _passwordController.text;
 
-                    if (email.isEmpty || password.isEmpty) {
-                      ArtSweetAlert.show(
-                        context: context,
-                        artDialogArgs: ArtDialogArgs(
-                          type: ArtSweetAlertType.warning,
-                          title: "Error",
-                          text: "Por favor complete todos los campos",
-                        ),
-                      );
-                      return;
-                    }
-                    if (_isLogin) {
-                      final userData = await _database.login(email, password);
-                      if (userData != null) {
-                        await SessionManager.setLoginDetails(
-                          email,
-                          nombre: userData['nombre'],
-                          imagePath: userData['imagePath'],
-                        );
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const DashboardScreen()),
-                        );
-                      } else {
+                      if (email.isEmpty || password.isEmpty) {
                         ArtSweetAlert.show(
                           context: context,
                           artDialogArgs: ArtDialogArgs(
-                            type: ArtSweetAlertType.danger,
+                            type: ArtSweetAlertType.warning,
                             title: "Error",
-                            text: "Credenciales incorrectas",
+                            text: "Por favor complete todos los campos",
                           ),
                         );
+                        return;
                       }
-                    }
-                  },
-                  child: Text(_isLogin ? 'Iniciar Sesión' : 'Registrarse'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SignUpScreen()),
-                    );
-                  },
-                  child: const Text(
-                    "¿No tienes cuenta? Regístrate",
-                    style: TextStyle(color: Colors.black87),
+                      if (_isLogin) {
+                        final userData = await _database.login(email, password);
+                        if (userData != null) {
+                          await SessionManager.setLoginDetails(
+                            email,
+                            nombre: userData['nombre'],
+                            imagePath: userData['imagePath'],
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const DashboardScreen()),
+                          );
+                        } else {
+                          ArtSweetAlert.show(
+                            context: context,
+                            artDialogArgs: ArtDialogArgs(
+                              type: ArtSweetAlertType.danger,
+                              title: "Error",
+                              text: "Credenciales incorrectas",
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: Text(_isLogin ? 'Iniciar Sesión' : 'Registrarse'),
                   ),
-                ),
-              ],
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SignUpScreen()),
+                      );
+                    },
+                    child: const Text(
+                      "¿No tienes cuenta? Regístrate",
+                      style: TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

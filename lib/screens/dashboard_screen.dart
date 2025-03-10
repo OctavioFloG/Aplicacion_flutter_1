@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
 import 'package:flutter_application_1/screens/settings_screen.dart';
+import 'package:flutter_application_1/utils/global_values.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
 import 'dart:io';
+
+import 'package:flutter_application_1/utils/theme_settings.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -20,6 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+    _loadTheme();
   }
 
   Future<void> _loadUserData() async {
@@ -31,43 +35,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  Future<void> _loadTheme() async {
+    final theme = await ThemeSettings.getTheme();
+    GlobalValues.themeApp.value = theme;
+  }
+
   @override
   Widget build(BuildContext context) {
     print(userName);
     return Scaffold(
       appBar: AppBar(
-        title: Text("Bienvenidos"),
+        title: const Text('Dashboard'),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
       ),
-      body: Center(
-          child: IconButton(
-        icon: const Icon(Icons.logout),
-        onPressed: () async {
-          await SessionManager.logout();
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-            (route) => false,
-          );
-        },
-      )),
+      body: Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: Center(
+            child: IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () async {
+            await SessionManager.logout();
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+              (route) => false,
+            );
+          },
+        )),
+      ),
       drawer: Drawer(
         child: ListView(
           children: [
             DrawerHeader(
-                padding: EdgeInsets.zero,
-                child: UserAccountsDrawerHeader(
-                  currentAccountPicture: CircleAvatar(
-                    backgroundImage: userImage != null && userImage!.isNotEmpty
-                        ? FileImage(File(userImage!))
-                        : const AssetImage("assets/default-avatar.jpg")
-                            as ImageProvider,
-                  ),
-                  accountName: Text(userName ?? "Usuario"),
-                  accountEmail: Text(userEmail ?? ""),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                  ),
-                )),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              child: UserAccountsDrawerHeader(
+                currentAccountPicture: CircleAvatar(
+                  backgroundImage: userImage != null && userImage!.isNotEmpty
+                      ? FileImage(File(userImage!))
+                      : const AssetImage("assets/default-avatar.jpg")
+                          as ImageProvider,
+                ),
+                accountName: Text(userName ?? "Usuario"),
+                accountEmail: Text(userEmail ?? ""),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
             ListTile(
               title: Text("Práctica Figma"),
               subtitle: Text("Frontend App"),
@@ -95,7 +112,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      //endDrawer: Drawer(),
     );
   }
 }

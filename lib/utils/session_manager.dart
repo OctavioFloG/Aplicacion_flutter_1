@@ -17,6 +17,8 @@ class SessionManager {
   static const String KEY_BACKGROUND_COLOR = "backgroundColor";
   static const String KEY_CONTAINER_COLOR = "containerColor";
   static const String KEY_FONT_FAMILY = "fontFamily";
+  static const String KEY_FONT_COLOR = "fontColor";
+
 
   static Future<void> setLoginDetails(String email,
       {String? imagePath, String? nombre}) async {
@@ -73,15 +75,14 @@ class SessionManager {
     return prefs.getBool(KEY_KEEP_SESSION) ?? false;
   }
 
+  // === TEMAS ===
   static Future<void> saveThemePreferences(
     String themeMode, {
     String? fontFamily,
     int? primaryColor,
-    int? accentColor,
     int? surfaceColor,
-    int? errorColor,
-    int? backgroundColor,
-    int? containerColor, // Añadir parámetro
+    int? containerColor,
+    int? fontColor,
   }) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(KEY_THEME_MODE, themeMode);
@@ -89,15 +90,12 @@ class SessionManager {
       await prefs.setString(KEY_FONT_FAMILY, fontFamily);
     }
     if (primaryColor != null) await prefs.setInt(KEY_PRIMARY_COLOR, primaryColor);
-    if (accentColor != null) await prefs.setInt(KEY_ACCENT_COLOR, accentColor);
     if (surfaceColor != null) await prefs.setInt(KEY_SURFACE_COLOR, surfaceColor);
-    if (errorColor != null) await prefs.setInt(KEY_ERROR_COLOR, errorColor);
-    if (backgroundColor != null) {
-      await prefs.setInt(KEY_BACKGROUND_COLOR, backgroundColor);
-    }
     if (containerColor != null) {
       await prefs.setInt(KEY_CONTAINER_COLOR, containerColor);
     }
+    if (fontColor != null) await prefs.setInt(KEY_FONT_COLOR, fontColor);
+
   }
 
   static Future<Map<String, dynamic>> getThemePreferences() async {
@@ -105,9 +103,9 @@ class SessionManager {
     return {
       'themeMode': prefs.getString(KEY_THEME_MODE) ?? 'light',
       'primaryColor': prefs.getInt(KEY_PRIMARY_COLOR),
-      'accentColor': prefs.getInt(KEY_ACCENT_COLOR),
       'containerColor': prefs.getInt(KEY_CONTAINER_COLOR),
       'fontFamily': prefs.getString(KEY_FONT_FAMILY) ?? 'Roboto',
+      'fontColor': prefs.getInt(KEY_FONT_COLOR),
     };
   }
 }

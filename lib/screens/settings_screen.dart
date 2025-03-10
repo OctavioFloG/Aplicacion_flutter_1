@@ -3,7 +3,6 @@ import 'package:flutter_application_1/utils/session_manager.dart';
 import 'package:flutter_application_1/utils/global_values.dart';
 import 'package:flutter_application_1/utils/theme_settings.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -15,16 +14,12 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _keepSession = false;
   String _currentTheme = 'light';
-  Map<String, Color> _colors = {
-    'primary': Colors.blue,
-    'secondary': Colors.amber,
-    'surface': Colors.grey,
-    'error': Colors.red,
-    'background': Colors.white,
-    'container': Colors.white70,
-  };
-  String _selectedFont = 'Roboto'; // Añadir variable para la fuente
-  
+  String _selectedFont = 'Roboto';
+  Color _primaryColor = Colors.blue;
+  Color _surfaceColor = Colors.white;
+  Color _textColor = Colors.black;
+  Color _containerColor = Colors.white;
+
   final List<String> _availableFonts = [
     'Roboto',
     'Lato',
@@ -42,22 +37,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadPreferences() async {
     final keepSession = await SessionManager.getKeepSession();
-    final themePrefs = await SessionManager.getThemePreferences();
+    final currentTheme = await ThemeSettings.getCurrentThemeMode();
+    final currentFont = await ThemeSettings.getCurrentFont();
+    final themePrefs = await ThemeSettings.getCustomThemeColors();
 
     setState(() {
       _keepSession = keepSession;
-      _currentTheme = themePrefs['themeMode'];
-      if (themePrefs['primaryColor'] != null) {
-        _colors['primary'] = Color(themePrefs['primaryColor']);
-      }
-      if (themePrefs['surfaceColor'] != null) {
-        _colors['surface'] = Color(themePrefs['surfaceColor']);
-      }
-      if (themePrefs['containerColor'] != null) {
-        _colors['container'] = Color(themePrefs['containerColor']);
-      }
-      _selectedFont = themePrefs['fontFamily'] ?? 'Roboto';
+      _currentTheme = currentTheme;
+      _selectedFont = currentFont;
+      _primaryColor = themePrefs['primary'] ?? Colors.blue;
+      _surfaceColor = themePrefs['surface'] ?? Colors.white;
+      _textColor = themePrefs['text'] ?? Colors.black;
+      _containerColor = themePrefs['container'] ?? Colors.white;
     });
+  }
+
+  void _showColorPicker(String colorType, Color initialColor) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        Color pickedColor = initialColor;
+        return AlertDialog(
+          title: Text('Seleccionar color para $colorType'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: initialColor,
+              onColorChanged: (Color color) {
+                pickedColor = color;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Seleccionar'),
+              onPressed: () {
+                _updateCustomColor(colorType, pickedColor);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _updateCustomColor(String colorType, Color color) async {
+    setState(() {
+      switch (colorType) {
+        case 'primary':
+          _primaryColor = color;
+          break;
+        case 'surface':
+          _surfaceColor = color;
+          break;
+        case 'text':
+          _textColor = color;
+          break;
+        case 'container':
+          _containerColor = color;
+          break;
+      }
+    });
+
+    await ThemeSettings.saveThemePreferences(
+      themeMode: 'custom',
+      primaryColor: _primaryColor,
+      surfaceColor: _surfaceColor,
+      textColor: _textColor,
+      containerColor: _containerColor,
+      fontFamily: _selectedFont,
+    );
+
+    await ThemeSettings.updateThemeMode('custom');
   }
 
   @override
@@ -68,195 +125,94 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
-          // === LOGIN ===
-          Card(
-            margin: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Configuración de Sesión',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                SwitchListTile(
-                  title: const Text('Mantener sesión iniciada'),
-                  subtitle: const Text(
-                    "La sesión se mantendrá activa al cerrar la aplicación",
-                  ),
-                  value: _keepSession,
-                  onChanged: (bool value) async {
-                    await SessionManager.setKeepSession(value);
-                    setState(() {
-                      _keepSession = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          // === TEMAS ===
-          Card(
-            margin: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'Tema',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                RadioListTile(
-                  title: const Text('Claro'),
-                  value: 'light',
-                  groupValue: _currentTheme,
-                  onChanged: _updateTheme,
-                ),
-                RadioListTile(
-                  title: const Text('Oscuro'),
-                  value: 'dark',
-                  groupValue: _currentTheme,
-                  onChanged: _updateTheme,
-                ),
-                RadioListTile(
-                  title: const Text('Personalizado'),
-                  value: 'custom',
-                  groupValue: _currentTheme,
-                  onChanged: _updateTheme,
-                ),
-              ],
-            ),
-          ),
-
-          // === COLORES PERSONALIZADOS ===
-          if (_currentTheme == 'custom')
-            Card(
-              margin: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'Colores Personalizados',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  _buildColorTile(
-                    'Color Principal',
-                    'primary',
-                    'Color de los elementos principales como botones, switches',
-                  ),
-                  _buildColorTile(
-                    'Color de Fondo',
-                    'surface',
-                    'Color de fondo para contenedores',
-                  ),
-
-                  _buildColorTile(
-                    'Color de Contenedores',
-                    'container',
-                    'Color de fondo para los contenedores y widgets',
-                  ),
-                ],
-              ),
-            ),
-
-          // Sección de tipografía
-          Card(
-            margin: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'Tipografía',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _availableFonts.length,
-                  itemBuilder: (context, index) {
-                    final font = _availableFonts[index];
-                    return RadioListTile(
-                      title: Text(
-                        font,
-                        style: GoogleFonts.getFont(font),
-                      ),
-                      subtitle: Text(
-                        'Ejemplo de texto con esta fuente',
-                        style: GoogleFonts.getFont(font),
-                      ),
-                      value: font,
-                      groupValue: _selectedFont,
-                      onChanged: (value) => _updateFont(value as String),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildColorTile(String title, String colorKey, String subtitle) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: _colors[colorKey],
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      onTap: () => _showColorPicker(colorKey),
-    );
-  }
-
-  void _showColorPicker(String colorKey) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Seleccionar ${colorKey.toUpperCase()}'),
-        content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: _colors[colorKey]!,
-            onColorChanged: (color) {
+          SwitchListTile(
+            title: const Text('Mantener sesión iniciada'),
+            value: _keepSession,
+            onChanged: (value) async {
+              await SessionManager.setKeepSession(value);
               setState(() {
-                _colors[colorKey] = color;
+                _keepSession = value;
               });
             },
-            portraitOnly: true,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+          ListTile(
+            title: const Text('Tema'),
+            trailing: DropdownButton<String>(
+              value: _currentTheme,
+              items: const [
+                DropdownMenuItem(value: 'light', child: Text('Claro')),
+                DropdownMenuItem(value: 'dark', child: Text('Oscuro')),
+                DropdownMenuItem(value: 'custom', child: Text('Personalizado')),
+              ],
+              onChanged: _updateTheme,
+            ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _applyCustomTheme();
-            },
-            child: const Text('Aplicar'),
+          if (_currentTheme == 'custom') ...[
+            ListTile(
+              title: const Text('Color primario'),
+              trailing: GestureDetector(
+                onTap: () => _showColorPicker('primary', _primaryColor),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _primaryColor,
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              title: const Text('Color de fondo'),
+              trailing: GestureDetector(
+                onTap: () => _showColorPicker('surface', _surfaceColor),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _surfaceColor,
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              title: const Text('Color de texto'),
+              trailing: GestureDetector(
+                onTap: () => _showColorPicker('text', _textColor),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _textColor,
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+          ],
+          ListTile(
+            title: const Text('Fuente'),
+            trailing: DropdownButton<String>(
+              value: _selectedFont,
+              items: _availableFonts
+                  .map((font) => DropdownMenuItem(
+                        value: font,
+                        child: Text(font),
+                      ))
+                  .toList(),
+              onChanged: (font) async {
+                if (font != null) {
+                  await ThemeSettings.updateFont(font);
+                  setState(() {
+                    _selectedFont = font;
+                  });
+                }
+              },
+            ),
           ),
         ],
       ),
@@ -265,116 +221,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _updateTheme(String? value) async {
     if (value != null) {
+      await ThemeSettings.updateThemeMode(value);
       setState(() {
         _currentTheme = value;
       });
-
-      switch (value) {
-        case 'dark':
-          await SessionManager.saveThemePreferences(
-            'dark',
-            fontFamily: _selectedFont, // Mantener la fuente actual
-          );
-          GlobalValues.themeApp.value = ThemeData.dark().copyWith(
-            textTheme: GoogleFonts.getTextTheme(
-              _selectedFont,
-              ThemeData.dark().textTheme,
-            ),
-          );
-          break;
-        case 'light':
-          await SessionManager.saveThemePreferences(
-            'light',
-            fontFamily: _selectedFont, // Mantener la fuente actual
-          );
-          GlobalValues.themeApp.value = ThemeData.light().copyWith(
-            textTheme: GoogleFonts.getTextTheme(
-              _selectedFont,
-              ThemeData.light().textTheme,
-            ),
-          );
-          break;
-        case 'custom':
-          await SessionManager.saveThemePreferences(
-            'custom',
-            fontFamily: _selectedFont, // Mantener la fuente actual
-          );
-          _applyCustomTheme();
-          break;
-      }
     }
-  }
-
-  void _updateFont(String font) async {
-    setState(() {
-      _selectedFont = font;
-    });
-
-    // Aplicar la fuente según el tema actual
-    switch (_currentTheme) {
-      case 'dark':
-        GlobalValues.themeApp.value = ThemeData.dark().copyWith(
-          textTheme: GoogleFonts.getTextTheme(
-            font,
-            ThemeData.dark().textTheme,
-          ),
-        );
-        break;
-      case 'light':
-        GlobalValues.themeApp.value = ThemeData.light().copyWith(
-          textTheme: GoogleFonts.getTextTheme(
-            font,
-            ThemeData.light().textTheme,
-          ),
-        );
-        break;
-      case 'custom':
-        _applyCustomTheme();
-        break;
-    }
-
-    // Guardar la preferencia de fuente
-    await SessionManager.saveThemePreferences(
-      _currentTheme,
-      fontFamily: font,
-    );
-  }
-
-  void _applyCustomTheme() async {
-    final customTheme = ThemeData(
-      useMaterial3: true,
-      textTheme: GoogleFonts.getTextTheme(
-        _selectedFont,
-        ThemeData.light().textTheme,
-      ),
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _colors['primary']!,
-        primary: _colors['primary'],
-        secondary: _colors['secondary'],
-        background: _colors['background'],
-      ),
-      cardTheme: CardTheme(
-        color: _colors['container'],
-      ),
-      dialogTheme: DialogTheme(
-        backgroundColor: _colors['container'],
-      ),
-      popupMenuTheme: PopupMenuThemeData(
-        color: _colors['container'],
-      ),
-    );
-
-    await SessionManager.saveThemePreferences(
-      'custom',
-      primaryColor: _colors['primary']!.value,
-      accentColor: _colors['secondary']!.value,
-      surfaceColor: _colors['surface']!.value,
-      containerColor: _colors['container']!.value, // Añadir color de contenedor
-      fontFamily: _selectedFont,
-    );
-
-    setState(() {
-      GlobalValues.themeApp.value = customTheme;
-    });
   }
 }

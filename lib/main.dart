@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/dashboard_screen.dart';
 import 'package:flutter_application_1/screens/list_students_screen.dart';
+import 'package:flutter_application_1/screens/login_screen.dart';
 import 'package:flutter_application_1/screens/sign_up_screen.dart';
 import 'package:flutter_application_1/screens/splash_screen.dart';
 import 'package:flutter_application_1/screens/todo_screen.dart';
@@ -15,63 +16,41 @@ import 'package:google_fonts/google_fonts.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  final themePrefs = await SessionManager.getThemePreferences();
+  // Esperar a que se cargue el tema antes de iniciar la app
+  final initialTheme = await ThemeSettings.getTheme();
+  GlobalValues.themeApp.value = initialTheme;
+
+  // Verificar si hay una sesión activa
   final isLoggedIn = await SessionManager.isLoggedIn();
+  final initialRoute = isLoggedIn ? '/dash' : '/login';
 
-  // Configurar el tema inicial
-  switch (themePrefs['themeMode']) {
-    case 'dark':
-      GlobalValues.themeApp.value = ThemeSettings.darkTheme();
-      break;
-    case 'custom':
-      if (themePrefs['primaryColor'] != null) {
-        GlobalValues.themeApp.value = ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Color(themePrefs['primaryColor']),
-            secondary: Color(themePrefs['accentColor'] ?? 0xFF1976D2),
-          ),
-          textTheme: GoogleFonts.getTextTheme(
-            themePrefs['fontFamily'],
-            ThemeData.light().textTheme,
-          ),
-        );
-      }
-      break;
-    default:
-      GlobalValues.themeApp.value = ThemeSettings.lightTheme();
-  }
-
-  runApp(MyApp(isLoggedIn: isLoggedIn));
+  runApp(MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn;
-  
-  const MyApp({
-    super.key,
-    required this.isLoggedIn,
-  });
+  final String initialRoute;
+  const MyApp({super.key, this.initialRoute = '/login'});
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: GlobalValues.themeApp,
-      builder: (context, value, child) {
+      builder: (context, ThemeData theme, child) {
         return MaterialApp(
-          theme: value,
-          home: isLoggedIn ? const DashboardScreen() : const SplashScreen(),
+          title: 'Mi App',
+          theme: theme,
+          initialRoute: initialRoute,
           routes: {
-            "/list": (context) => const ListStudentsScreen(),
-            "/dash": (context) => const DashboardScreen(),
-            "/todo": (context) => const TodoScreen(),
-            "/signup": (context) => const SignUpScreen(),
-
-            // === Práctica 1 ===
-            "/viajes1": (context) => const ViajesScreen1(),
-            "/viajes2": (context) => const ViajesScreen2(),
-            "/viajes3": (context) => const ViajesScreen3(),
+            '/': (context) => const SplashScreen(),
+            '/login': (context) => const LoginScreen(),
+            '/dash': (context) => const DashboardScreen(),
+            '/list': (context) => const ListStudentsScreen(),
+            '/todo': (context) => const TodoScreen(),
+            '/signup': (context) => const SignUpScreen(),
+            '/viajes1': (context) => const ViajesScreen1(),
+            '/viajes2': (context) => const ViajesScreen2(),
+            '/viajes3': (context) => const ViajesScreen3(),
           },
-          title: 'Material App',
         );
       },
     );
