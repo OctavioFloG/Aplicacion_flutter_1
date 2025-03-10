@@ -9,54 +9,67 @@ import 'package:flutter_application_1/screens/viajes_screen1.dart';
 import 'package:flutter_application_1/screens/viajes_screen3.dart';
 import 'package:flutter_application_1/utils/global_values.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
-import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:flutter_application_1/utils/theme_settings.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  bool isLoggedIn = await SessionManager.isLoggedIn();
   
-  runApp(MaterialApp(
-    home: isLoggedIn ? const DashboardScreen() : const MyApp(),
-    theme: GlobalValues.themeApp.value,
-    routes: {
-      "/list": (context) => const ListStudentsScreen(),
-      "/dash": (context) => const DashboardScreen(),
-      "/todo": (context) => const TodoScreen(),
-      "/signup": (context) => const SignUpScreen(),
+  // sharedPreferences
+  final themePrefs = await SessionManager.getThemePreferences();
+  final isLoggedIn = await SessionManager.isLoggedIn();
 
-      // === Práctica 1 ===
-      "/viajes1": (context) => const ViajesScreen1(),
-      "/viajes2": (context) => const ViajesScreen2(),
-      "/viajes3": (context) => const ViajesScreen3(),
-    },
-    title: 'Material App',
-  ));
+  // Configurar el tema inicial
+  switch (themePrefs['themeMode']) {
+    case 'dark':
+      GlobalValues.themeApp.value = ThemeSettings.darkTheme();
+      break;
+    case 'custom':
+      if (themePrefs['primaryColor'] != null) {
+        GlobalValues.themeApp.value = ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Color(themePrefs['primaryColor']),
+            secondary: Color(themePrefs['accentColor'] ?? 0xFF1976D2),
+          ),
+        );
+      }
+      break;
+    default:
+      GlobalValues.themeApp.value = ThemeSettings.lightTheme();
+  }
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  
+  const MyApp({
+    super.key,
+    required this.isLoggedIn,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: GlobalValues.themeApp,
-        builder: (context, value, child) {
-          return MaterialApp(
-            theme: value,
-            routes: {
-              "/list": (context) => const ListStudentsScreen(),
-              "/dash": (context) => const DashboardScreen(),
-              "/todo": (context) => const TodoScreen(),
-              "/signup": (context) => const SignUpScreen(),
+      valueListenable: GlobalValues.themeApp,
+      builder: (context, value, child) {
+        return MaterialApp(
+          theme: value,
+          home: isLoggedIn ? const DashboardScreen() : const SplashScreen(),
+          routes: {
+            "/list": (context) => const ListStudentsScreen(),
+            "/dash": (context) => const DashboardScreen(),
+            "/todo": (context) => const TodoScreen(),
+            "/signup": (context) => const SignUpScreen(),
 
-              // === Práctica 1 ===
-              "/viajes1": (context) => const ViajesScreen1(),
-              "/viajes2": (context) => const ViajesScreen2(),
-              "/viajes3": (context) => const ViajesScreen3(),
-            },
-            title: 'Material App',
-            home: const SplashScreen(),
-          );
-        });
+            // === Práctica 1 ===
+            "/viajes1": (context) => const ViajesScreen1(),
+            "/viajes2": (context) => const ViajesScreen2(),
+            "/viajes3": (context) => const ViajesScreen3(),
+          },
+          title: 'Material App',
+        );
+      },
+    );
   }
 }

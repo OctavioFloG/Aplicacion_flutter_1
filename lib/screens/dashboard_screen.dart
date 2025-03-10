@@ -1,9 +1,7 @@
-import 'package:dark_light_button/dark_light_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
-import 'package:flutter_application_1/utils/global_values.dart';
+import 'package:flutter_application_1/screens/settings_screen.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
-import 'package:flutter_application_1/utils/theme_settings.dart';
 import 'dart:io';
 
 class DashboardScreen extends StatefulWidget {
@@ -39,22 +37,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Bienvenidos"),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 20),
-            child: DarlightButton(
-                type: Darlights.DarlightFour,
-                onChange: (value) {
-                  // Alternar entre temas claro y oscuro
-                  if (value == ThemeMode.light) {
-                    GlobalValues.themeApp.value = ThemeSettings.lightTheme();
-                  } else {
-                    GlobalValues.themeApp.value = ThemeSettings.darkTheme();
-                  }
-                },
-                options: DarlightFourOption()),
-          ),
-        ],
       ),
       body: Center(
           child: IconButton(
@@ -99,7 +81,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               leading: Icon(Icons.task),
               trailing: Icon(Icons.chevron_right),
               onTap: () => Navigator.pushNamed(context, "/todo"),
-            )
+            ),
+            ListTile(
+              title: const Text("Configuración"),
+              subtitle: const Text("Preferencias de la aplicación"),
+              leading: const Icon(Icons.settings),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              ),
+            ),
           ],
         ),
       ),

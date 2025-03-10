@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionManager {
@@ -5,6 +7,11 @@ class SessionManager {
   static const String KEY_EMAIL = "userEmail";
   static const String KEY_IMAGE = "userImage";
   static const String KEY_NAME = "userName";
+  static const String KEY_KEEP_SESSION = "keepSession";
+  static const String KEY_THEME_MODE = "themeMode";
+  static const String KEY_PRIMARY_COLOR = "primaryColor";
+  static const String KEY_ACCENT_COLOR = "accentColor";
+
 
   static Future<void> setLoginDetails(String email,
       {String? imagePath, String? nombre}) async {
@@ -30,11 +37,54 @@ class SessionManager {
 
   static Future<void> logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    bool keepSession = await getKeepSession();
+    if (!keepSession) {
+      await prefs.clear();
+    } else {
+      // Solo eliminar datos sensibles pero mantener preferencias
+      await prefs.remove(KEY_LOGIN);
+      await prefs.remove(KEY_EMAIL);
+      await prefs.remove(KEY_NAME);
+      await prefs.remove(KEY_IMAGE);
+    }
   }
 
   static Future<bool> isLoggedIn() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(KEY_LOGIN) ?? false;
+    bool keepSession = await getKeepSession();
+    bool isLogged = prefs.getBool(KEY_LOGIN) ?? false;
+    
+    return isLogged && keepSession; // (isLogged and keepSession) == true
+  }
+
+  //SETTINGS
+  static Future<void> setKeepSession(bool keep) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(KEY_KEEP_SESSION, keep);
+  }
+
+  static Future<bool> getKeepSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(KEY_KEEP_SESSION) ?? false;
+  }
+
+  static Future<void> saveThemePreferences(String themeMode, {int? primaryColor, int? accentColor}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(KEY_THEME_MODE, themeMode);
+    if (primaryColor != null) {
+      await prefs.setInt(KEY_PRIMARY_COLOR, primaryColor);
+    }
+    if (accentColor != null) {
+      await prefs.setInt(KEY_ACCENT_COLOR, accentColor);
+    }
+  }
+
+  static Future<Map<String, dynamic>> getThemePreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return {
+      'themeMode': prefs.getString(KEY_THEME_MODE) ?? 'light',
+      'primaryColor': prefs.getInt(KEY_PRIMARY_COLOR),
+      'accentColor': prefs.getInt(KEY_ACCENT_COLOR),
+    };
   }
 }
