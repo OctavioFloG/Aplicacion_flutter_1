@@ -19,7 +19,6 @@ class SessionManager {
   static const String KEY_FONT_FAMILY = "fontFamily";
   static const String KEY_FONT_COLOR = "fontColor";
 
-
   static Future<void> setLoginDetails(String email,
       {String? imagePath, String? nombre}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -48,7 +47,7 @@ class SessionManager {
     if (!keepSession) {
       await prefs.clear();
     } else {
-      // Solo eliminar datos sensibles pero mantener preferencias
+      // ELiminar datos de sesion
       await prefs.remove(KEY_LOGIN);
       await prefs.remove(KEY_EMAIL);
       await prefs.remove(KEY_NAME);
@@ -56,23 +55,42 @@ class SessionManager {
     }
   }
 
-  static Future<bool> isLoggedIn() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool keepSession = await getKeepSession();
-    bool isLogged = prefs.getBool(KEY_LOGIN) ?? false;
-    
-    return isLogged && keepSession; // (isLogged and keepSession) == true
+  static Future<void> setLoggedIn(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(KEY_LOGIN, value);
   }
 
-  //SETTINGS
-  static Future<void> setKeepSession(bool keep) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(KEY_KEEP_SESSION, keep);
+  static Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keepSession = await getKeepSession();
+    final isLogged = prefs.getBool(KEY_LOGIN) ?? false;
+    
+    // Solo consideramos que está logueado si ambos son true
+    return isLogged && keepSession;
+  }
+
+  static Future<void> setKeepSession(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(KEY_KEEP_SESSION, value);
   }
 
   static Future<bool> getKeepSession() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(KEY_KEEP_SESSION) ?? false;
+  }
+
+  static Future<void> clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keepSession = await getKeepSession(); // Guardamos el valor actual
+    
+    // Limpiamos solo los datos de sesión
+    await prefs.remove(KEY_LOGIN);
+    await prefs.remove(KEY_EMAIL);
+    await prefs.remove(KEY_NAME);
+    await prefs.remove(KEY_IMAGE);
+    
+    // Restauramos la preferencia de mantener sesión
+    await setKeepSession(keepSession);
   }
 
   // === TEMAS ===

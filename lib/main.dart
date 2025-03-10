@@ -16,15 +16,15 @@ import 'package:google_fonts/google_fonts.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Esperar a que se cargue el tema antes de iniciar la app
-  final initialTheme = await ThemeSettings.getTheme();
-  GlobalValues.themeApp.value = initialTheme;
-
+  // Inicializar el tema
+  await GlobalValues.initializeTheme();
+  
   // Verificar si hay una sesión activa y si se debe mantener
   final isLoggedIn = await SessionManager.isLoggedIn();
   final keepSession = await SessionManager.getKeepSession();
+  
   final initialRoute = (isLoggedIn && keepSession) ? '/dash' : '/login';
-
+  
   runApp(MyApp(initialRoute: initialRoute));
 }
 
@@ -40,10 +40,19 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Mi App',
           theme: theme,
-          // Siempre iniciamos con el splash
-          initialRoute: '/',
+          home: FutureBuilder(
+            future: _checkSession(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SplashScreen();
+              }
+              // Si hay sesión activa, ir a dashboard, sino al login
+              return snapshot.data == true 
+                  ? const DashboardScreen() 
+                  : const LoginScreen();
+            },
+          ),
           routes: {
-            '/': (context) => const SplashScreen(),
             '/login': (context) => const LoginScreen(),
             '/dash': (context) => const DashboardScreen(),
             '/list': (context) => const ListStudentsScreen(),
@@ -53,17 +62,14 @@ class MyApp extends StatelessWidget {
             '/viajes2': (context) => const ViajesScreen2(),
             '/viajes3': (context) => const ViajesScreen3(),
           },
-          // Redirigir a la ruta inicial después del login
-          onGenerateRoute: (settings) {
-            if (settings.name == '/login' && initialRoute == '/dash') {
-              return MaterialPageRoute(
-                builder: (context) => const DashboardScreen(),
-              );
-            }
-            return null;
-          },
         );
       },
     );
+  }
+
+  Future<bool> _checkSession() async {
+    final isLoggedIn = await SessionManager.isLoggedIn();
+    final keepSession = await SessionManager.getKeepSession();
+    return isLoggedIn && keepSession;
   }
 }

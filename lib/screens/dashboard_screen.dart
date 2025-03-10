@@ -40,6 +40,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
     GlobalValues.themeApp.value = theme;
   }
 
+  Future<void> _logout() async {
+    // Guardar preferencia de mantener sesión antes de limpiar
+    final keepSession = await SessionManager.getKeepSession();
+    // Limpiar sesión
+    await SessionManager.clearSession();
+    // Restaurar preferencia de mantener sesión
+    await SessionManager.setKeepSession(keepSession);
+
+    if (mounted) {
+      // Usar pushAndRemoveUntil para limpiar la pila de navegación
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     print(userName);
@@ -52,17 +70,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: Container(
         color: Theme.of(context).scaffoldBackgroundColor,
         child: Center(
-            child: IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () async {
-            await SessionManager.logout();
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginScreen()),
-              (route) => false,
-            );
-          },
-        )),
+          child: IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout, // Usar el método unificado
+          ),
+        ),
       ),
       drawer: Drawer(
         child: ListView(
@@ -108,6 +120,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               ),
+            ),
+            ListTile(
+              title: const Text("Cerrar Sesión"),
+              subtitle: const Text("Salir de la aplicación"),
+              leading: const Icon(Icons.logout),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _logout,
             ),
           ],
         ),

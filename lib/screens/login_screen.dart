@@ -97,12 +97,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 nombre: userData['nombre'],
                                 imagePath: userData['imagePath'],
                               );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const DashboardScreen()),
-                              );
+                              // Establecer que el usuario está logueado y mantener la sesión
+                              await SessionManager.setLoggedIn(true);
+                              await SessionManager.setKeepSession(true);
+                              
+                              // Usar pushReplacement para evitar volver al login
+                              Navigator.pushReplacementNamed(context, '/dash');
                             } else {
                               ArtSweetAlert.show(
                                 context: context,
@@ -127,7 +127,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         child: const Text(
                           "¿No tienes cuenta? Regístrate",
-                          style: TextStyle(color: Colors.black87),
                         ),
                       ),
                     ],
