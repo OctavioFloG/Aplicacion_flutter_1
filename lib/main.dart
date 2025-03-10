@@ -10,11 +10,11 @@ import 'package:flutter_application_1/screens/viajes_screen3.dart';
 import 'package:flutter_application_1/utils/global_values.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
 import 'package:flutter_application_1/utils/theme_settings.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // sharedPreferences
   final themePrefs = await SessionManager.getThemePreferences();
   final isLoggedIn = await SessionManager.isLoggedIn();
 
@@ -29,6 +29,10 @@ void main() async {
           colorScheme: ColorScheme.fromSeed(
             seedColor: Color(themePrefs['primaryColor']),
             secondary: Color(themePrefs['accentColor'] ?? 0xFF1976D2),
+          ),
+          textTheme: GoogleFonts.getTextTheme(
+            themePrefs['fontFamily'],
+            ThemeData.light().textTheme,
           ),
         );
       }

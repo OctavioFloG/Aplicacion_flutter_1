@@ -3,6 +3,7 @@ import 'package:flutter_application_1/utils/session_manager.dart';
 import 'package:flutter_application_1/utils/global_values.dart';
 import 'package:flutter_application_1/utils/theme_settings.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,8 +15,24 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _keepSession = false;
   String _currentTheme = 'light';
-  Color _primaryColor = Colors.blue;
-  Color _accentColor = Colors.amber;
+  Map<String, Color> _colors = {
+    'primary': Colors.blue,
+    'secondary': Colors.amber,
+    'surface': Colors.grey,
+    'error': Colors.red,
+    'background': Colors.white,
+    'container': Colors.white70,
+  };
+  String _selectedFont = 'Roboto'; // Añadir variable para la fuente
+  
+  final List<String> _availableFonts = [
+    'Roboto',
+    'Lato',
+    'Montserrat',
+    'Poppins',
+    'Raleway',
+    'Ubuntu',
+  ];
 
   @override
   void initState() {
@@ -26,16 +43,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadPreferences() async {
     final keepSession = await SessionManager.getKeepSession();
     final themePrefs = await SessionManager.getThemePreferences();
-    
+
     setState(() {
       _keepSession = keepSession;
       _currentTheme = themePrefs['themeMode'];
       if (themePrefs['primaryColor'] != null) {
-        _primaryColor = Color(themePrefs['primaryColor']);
+        _colors['primary'] = Color(themePrefs['primaryColor']);
       }
-      if (themePrefs['accentColor'] != null) {
-        _accentColor = Color(themePrefs['accentColor']);
+      if (themePrefs['surfaceColor'] != null) {
+        _colors['surface'] = Color(themePrefs['surfaceColor']);
       }
+      if (themePrefs['containerColor'] != null) {
+        _colors['container'] = Color(themePrefs['containerColor']);
+      }
+      _selectedFont = themePrefs['fontFamily'] ?? 'Roboto';
     });
   }
 
@@ -47,7 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
-          // Sección de Sesión
+          // === LOGIN ===
           Card(
             margin: const EdgeInsets.all(8.0),
             child: Column(
@@ -80,68 +101,162 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // Sección de Tema
+          // === TEMAS ===
           Card(
-            margin: const EdgeInsets.all(8.0),
+            margin: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16),
                   child: Text(
-                    'Tema de la Aplicación',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Tema',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 RadioListTile(
-                  title: const Text('Tema Claro'),
+                  title: const Text('Claro'),
                   value: 'light',
                   groupValue: _currentTheme,
                   onChanged: _updateTheme,
                 ),
                 RadioListTile(
-                  title: const Text('Tema Oscuro'),
+                  title: const Text('Oscuro'),
                   value: 'dark',
                   groupValue: _currentTheme,
                   onChanged: _updateTheme,
                 ),
                 RadioListTile(
-                  title: const Text('Tema Personalizado'),
+                  title: const Text('Personalizado'),
                   value: 'custom',
                   groupValue: _currentTheme,
                   onChanged: _updateTheme,
                 ),
-                if (_currentTheme == 'custom')
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          title: const Text('Color Primario'),
-                          trailing: Container(
-                            width: 24,
-                            height: 24,
-                            color: _primaryColor,
-                          ),
-                          onTap: () => _showColorPicker(true),
-                        ),
-                        ListTile(
-                          title: const Text('Color de Acento'),
-                          trailing: Container(
-                            width: 24,
-                            height: 24,
-                            color: _accentColor,
-                          ),
-                          onTap: () => _showColorPicker(false),
-                        ),
-                      ],
-                    ),
-                  ),
               ],
             ),
+          ),
+
+          // === COLORES PERSONALIZADOS ===
+          if (_currentTheme == 'custom')
+            Card(
+              margin: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'Colores Personalizados',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  _buildColorTile(
+                    'Color Principal',
+                    'primary',
+                    'Color de los elementos principales como botones, switches',
+                  ),
+                  _buildColorTile(
+                    'Color de Fondo',
+                    'surface',
+                    'Color de fondo para contenedores',
+                  ),
+
+                  _buildColorTile(
+                    'Color de Contenedores',
+                    'container',
+                    'Color de fondo para los contenedores y widgets',
+                  ),
+                ],
+              ),
+            ),
+
+          // Sección de tipografía
+          Card(
+            margin: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'Tipografía',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _availableFonts.length,
+                  itemBuilder: (context, index) {
+                    final font = _availableFonts[index];
+                    return RadioListTile(
+                      title: Text(
+                        font,
+                        style: GoogleFonts.getFont(font),
+                      ),
+                      subtitle: Text(
+                        'Ejemplo de texto con esta fuente',
+                        style: GoogleFonts.getFont(font),
+                      ),
+                      value: font,
+                      groupValue: _selectedFont,
+                      onChanged: (value) => _updateFont(value as String),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildColorTile(String title, String colorKey, String subtitle) {
+    return ListTile(
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: _colors[colorKey],
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      onTap: () => _showColorPicker(colorKey),
+    );
+  }
+
+  void _showColorPicker(String colorKey) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Seleccionar ${colorKey.toUpperCase()}'),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: _colors[colorKey]!,
+            onColorChanged: (color) {
+              setState(() {
+                _colors[colorKey] = color;
+              });
+            },
+            portraitOnly: true,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _applyCustomTheme();
+            },
+            child: const Text('Aplicar'),
           ),
         ],
       ),
@@ -171,52 +286,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _showColorPicker(bool isPrimary) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isPrimary ? 'Color Primario' : 'Color de Acento'),
-        content: SingleChildScrollView(
-          child: ColorPicker(
-            pickerColor: isPrimary ? _primaryColor : _accentColor,
-            onColorChanged: (color) {
-              setState(() {
-                if (isPrimary) {
-                  _primaryColor = color;
-                } else {
-                  _accentColor = color;
-                }
-              });
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _applyCustomTheme();
-            },
-            child: const Text('Aplicar'),
-          ),
-        ],
-      ),
+  void _updateFont(String font) async {
+    setState(() {
+      _selectedFont = font;
+    });
+    await SessionManager.saveThemePreferences(
+      _currentTheme,
+      fontFamily: font,
     );
+    _applyCustomTheme();
   }
 
   void _applyCustomTheme() async {
     final customTheme = ThemeData(
-      useMaterial3: true, // Añadir esto para mejor soporte de temas
+      useMaterial3: true,
+      textTheme: GoogleFonts.getTextTheme(
+        _selectedFont,
+        ThemeData.light().textTheme,
+      ),
       colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryColor,
-        primary: _primaryColor,
-        secondary: _accentColor,
+        seedColor: _colors['primary']!,
+        primary: _colors['primary'],
+        secondary: _colors['secondary'],
+        background: _colors['background'],
+      ),
+      cardTheme: CardTheme(
+        color: _colors['container'],
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: _colors['container'],
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: _colors['container'],
       ),
     );
 
     await SessionManager.saveThemePreferences(
       'custom',
-      primaryColor: _primaryColor.value,
-      accentColor: _accentColor.value,
+      primaryColor: _colors['primary']!.value,
+      accentColor: _colors['secondary']!.value,
+      surfaceColor: _colors['surface']!.value,
+      containerColor: _colors['container']!.value, // Añadir color de contenedor
+      fontFamily: _selectedFont,
     );
 
     setState(() {
