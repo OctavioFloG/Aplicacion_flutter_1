@@ -20,9 +20,10 @@ void main() async {
   final initialTheme = await ThemeSettings.getTheme();
   GlobalValues.themeApp.value = initialTheme;
 
-  // Verificar si hay una sesión activa
+  // Verificar si hay una sesión activa y si se debe mantener
   final isLoggedIn = await SessionManager.isLoggedIn();
-  final initialRoute = isLoggedIn ? '/dash' : '/login';
+  final keepSession = await SessionManager.getKeepSession();
+  final initialRoute = (isLoggedIn && keepSession) ? '/dash' : '/login';
 
   runApp(MyApp(initialRoute: initialRoute));
 }
@@ -39,7 +40,8 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Mi App',
           theme: theme,
-          initialRoute: initialRoute,
+          // Siempre iniciamos con el splash
+          initialRoute: '/',
           routes: {
             '/': (context) => const SplashScreen(),
             '/login': (context) => const LoginScreen(),
@@ -50,6 +52,15 @@ class MyApp extends StatelessWidget {
             '/viajes1': (context) => const ViajesScreen1(),
             '/viajes2': (context) => const ViajesScreen2(),
             '/viajes3': (context) => const ViajesScreen3(),
+          },
+          // Redirigir a la ruta inicial después del login
+          onGenerateRoute: (settings) {
+            if (settings.name == '/login' && initialRoute == '/dash') {
+              return MaterialPageRoute(
+                builder: (context) => const DashboardScreen(),
+              );
+            }
+            return null;
           },
         );
       },

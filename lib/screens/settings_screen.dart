@@ -279,13 +279,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _updateTheme(String? value) async {
-    if (value != null) {
-      await ThemeSettings.updateThemeMode(value);
-      setState(() {
-        _currentTheme = value;
-      });
+  if (value != null) {
+    setState(() {
+      _currentTheme = value;
+    });
+
+    switch (value) {
+      case 'light':
+        await ThemeSettings.updateThemeMode(value);
+        GlobalValues.themeApp.value = ThemeSettings.lightTheme();
+        break;
+      case 'dark':
+        await ThemeSettings.updateThemeMode(value);
+        GlobalValues.themeApp.value = ThemeSettings.darkTheme();
+        break;
+      case 'custom':
+        final customTheme = await ThemeSettings.loadCustomTheme();
+        GlobalValues.themeApp.value = customTheme;
+        break;
     }
   }
+}
 
   Widget _buildSection(String title, List<Widget> children) {
     return Column(
