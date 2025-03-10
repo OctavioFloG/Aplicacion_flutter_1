@@ -114,7 +114,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       fontFamily: _selectedFont,
     );
 
-    await ThemeSettings.updateThemeMode('custom');
+    // Forzar la actualización del tema inmediatamente
+    final updatedTheme = await ThemeSettings.loadCustomTheme();
+    GlobalValues.themeApp.value = updatedTheme;
   }
 
   @override
@@ -123,98 +125,155 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: const Text('Configuración'),
       ),
-      body: ListView(
-        children: [
-          SwitchListTile(
-            title: const Text('Mantener sesión iniciada'),
-            value: _keepSession,
-            onChanged: (value) async {
-              await SessionManager.setKeepSession(value);
-              setState(() {
-                _keepSession = value;
-              });
-            },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).primaryColor.withOpacity(0.3),
+              Theme.of(context).scaffoldBackgroundColor,
+            ],
           ),
-          ListTile(
-            title: const Text('Tema'),
-            trailing: DropdownButton<String>(
-              value: _currentTheme,
-              items: const [
-                DropdownMenuItem(value: 'light', child: Text('Claro')),
-                DropdownMenuItem(value: 'dark', child: Text('Oscuro')),
-                DropdownMenuItem(value: 'custom', child: Text('Personalizado')),
-              ],
-              onChanged: _updateTheme,
-            ),
-          ),
-          if (_currentTheme == 'custom') ...[
-            ListTile(
-              title: const Text('Color primario'),
-              trailing: GestureDetector(
-                onTap: () => _showColorPicker('primary', _primaryColor),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _primaryColor,
-                    border: Border.all(),
-                    borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 5,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView(
+                children: [
+                  // Sección de Sesión
+                  _buildSection(
+                    'Sesión',
+                    [
+                      SwitchListTile(
+                        title: const Text('Mantener sesión iniciada'),
+                        value: _keepSession,
+                        onChanged: (value) async {
+                          await SessionManager.setKeepSession(value);
+                          setState(() {
+                            _keepSession = value;
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                ),
+                  const Divider(),
+                  // Sección de Apariencia
+                  _buildSection(
+                    'Apariencia',
+                    [
+                      ListTile(
+                        title: const Text('Tema'),
+                        trailing: DropdownButton<String>(
+                          value: _currentTheme,
+                          items: const [
+                            DropdownMenuItem(value: 'light', child: Text('Claro')),
+                            DropdownMenuItem(value: 'dark', child: Text('Oscuro')),
+                            DropdownMenuItem(value: 'custom', child: Text('Personalizado')),
+                          ],
+                          onChanged: _updateTheme,
+                        ),
+                      ),
+                      if (_currentTheme == 'custom') ...[
+                        const Divider(),
+                        ListTile(
+                          title: const Text('Color primario'),
+                          trailing: GestureDetector(
+                            onTap: () => _showColorPicker('primary', _primaryColor),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: _primaryColor,
+                                border: Border.all(),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text('Color de fondo'),
+                          trailing: GestureDetector(
+                            onTap: () => _showColorPicker('surface', _surfaceColor),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: _surfaceColor,
+                                border: Border.all(),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text('Color de texto'),
+                          trailing: GestureDetector(
+                            onTap: () => _showColorPicker('text', _textColor),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: _textColor,
+                                border: Border.all(),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const Divider(),
+                      ListTile(
+                        title: const Text('Fuente'),
+                        trailing: DropdownButton<String>(
+                          value: _selectedFont,
+                          items: _availableFonts
+                              .map((font) => DropdownMenuItem(
+                                    value: font,
+                                    child: Text(font),
+                                  ))
+                              .toList(),
+                          onChanged: (font) async {
+                            if (font != null) {
+                              await ThemeSettings.updateFont(font);
+                              setState(() {
+                                _selectedFont = font;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            ListTile(
-              title: const Text('Color de fondo'),
-              trailing: GestureDetector(
-                onTap: () => _showColorPicker('surface', _surfaceColor),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _surfaceColor,
-                    border: Border.all(),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-            ),
-            ListTile(
-              title: const Text('Color de texto'),
-              trailing: GestureDetector(
-                onTap: () => _showColorPicker('text', _textColor),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _textColor,
-                    border: Border.all(),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-            ),
-          ],
-          ListTile(
-            title: const Text('Fuente'),
-            trailing: DropdownButton<String>(
-              value: _selectedFont,
-              items: _availableFonts
-                  .map((font) => DropdownMenuItem(
-                        value: font,
-                        child: Text(font),
-                      ))
-                  .toList(),
-              onChanged: (font) async {
-                if (font != null) {
-                  await ThemeSettings.updateFont(font);
-                  setState(() {
-                    _selectedFont = font;
-                  });
-                }
-              },
-            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -226,5 +285,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _currentTheme = value;
       });
     }
+  }
+
+  Widget _buildSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        ...children,
+      ],
+    );
   }
 }
