@@ -271,16 +271,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       switch (value) {
         case 'dark':
-          await SessionManager.saveThemePreferences('dark');
-          GlobalValues.themeApp.value = ThemeSettings.darkTheme();
+          await SessionManager.saveThemePreferences(
+            'dark',
+            fontFamily: _selectedFont, // Mantener la fuente actual
+          );
+          GlobalValues.themeApp.value = ThemeData.dark().copyWith(
+            textTheme: GoogleFonts.getTextTheme(
+              _selectedFont,
+              ThemeData.dark().textTheme,
+            ),
+          );
           break;
         case 'light':
-          await SessionManager.saveThemePreferences('light');
-          GlobalValues.themeApp.value = ThemeSettings.lightTheme();
+          await SessionManager.saveThemePreferences(
+            'light',
+            fontFamily: _selectedFont, // Mantener la fuente actual
+          );
+          GlobalValues.themeApp.value = ThemeData.light().copyWith(
+            textTheme: GoogleFonts.getTextTheme(
+              _selectedFont,
+              ThemeData.light().textTheme,
+            ),
+          );
           break;
         case 'custom':
-          // Solo cambiar a custom, los colores se aplicarán después
-          await SessionManager.saveThemePreferences('custom');
+          await SessionManager.saveThemePreferences(
+            'custom',
+            fontFamily: _selectedFont, // Mantener la fuente actual
+          );
+          _applyCustomTheme();
           break;
       }
     }
@@ -290,11 +309,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _selectedFont = font;
     });
+
+    // Aplicar la fuente según el tema actual
+    switch (_currentTheme) {
+      case 'dark':
+        GlobalValues.themeApp.value = ThemeData.dark().copyWith(
+          textTheme: GoogleFonts.getTextTheme(
+            font,
+            ThemeData.dark().textTheme,
+          ),
+        );
+        break;
+      case 'light':
+        GlobalValues.themeApp.value = ThemeData.light().copyWith(
+          textTheme: GoogleFonts.getTextTheme(
+            font,
+            ThemeData.light().textTheme,
+          ),
+        );
+        break;
+      case 'custom':
+        _applyCustomTheme();
+        break;
+    }
+
+    // Guardar la preferencia de fuente
     await SessionManager.saveThemePreferences(
       _currentTheme,
       fontFamily: font,
     );
-    _applyCustomTheme();
   }
 
   void _applyCustomTheme() async {
