@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "936496190525",
+    "project_id": "programovilocta",
+    "storage_bucket": "programovilocta.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936496190525:android:0b0c8f987044699ca08654",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcMg27u073ATOuKZp7vguGMLMf_PWzRUg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
