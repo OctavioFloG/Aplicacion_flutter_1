@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/services/auth_firebase.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_application_1/database/user_databa.dart';
 import 'package:art_sweetalert/art_sweetalert.dart';
@@ -13,12 +14,19 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUpScreen> {
+  AuthFirebase? auth;
   File? _image;
   final ImagePicker picker = ImagePicker();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final UserDatabase _database = UserDatabase();
+
+  @override
+  void initState() {
+    super.initState();
+    auth = AuthFirebase();
+  }
 
   Future getImage(ImageSource source) async {
     final pickedFile = await picker.pickImage(source: source);
@@ -115,7 +123,9 @@ class _SignUpState extends State<SignUpScreen> {
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
+
               onPressed: () async {
+                // ============= VALIDACION ============
                 if (_nameController.text.isEmpty ||
                     _emailController.text.isEmpty ||
                     _passwordController.text.isEmpty) {
@@ -129,7 +139,6 @@ class _SignUpState extends State<SignUpScreen> {
                   );
                   return;
                 }
-                
                 RegExp expression = RegExp("[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*@[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,5}");
                 if (!expression.hasMatch(_emailController.text)) {
                   ArtSweetAlert.show(
@@ -142,15 +151,16 @@ class _SignUpState extends State<SignUpScreen> {
                   );
                   return;
                 }
-
                 try {
-                  await _database.registerUser(
-                    _emailController.text,
-                    _passwordController.text,
-                    nombre: _nameController.text,
-                    imageFile: _image, // Pasar la imagen seleccionada
-                  );
-
+                  await auth!.createUser(_emailController.text, _passwordController.text).then((value) {
+                    print("HOLAAAA");
+                  },);
+                  // await _database.registerUser(
+                  //   _emailController.text,
+                  //   _passwordController.text,
+                  //   nombre: _nameController.text,
+                  //   imageFile: _image, // Pasar la imagen seleccionada
+                  // );
                   await ArtSweetAlert.show(
                     context: context,
                     artDialogArgs: ArtDialogArgs(
@@ -159,7 +169,6 @@ class _SignUpState extends State<SignUpScreen> {
                       text: "Usuario registrado correctamente",
                     ),
                   );
-
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -175,6 +184,7 @@ class _SignUpState extends State<SignUpScreen> {
                     ),
                   );
                 }
+                // =============== FIN VALIDACION ===============
               },
               child: const Text('Registrarse'),
             )

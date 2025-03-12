@@ -1,4 +1,6 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/firebase_options.dart';
 import 'package:flutter_application_1/screens/dashboard_screen.dart';
 import 'package:flutter_application_1/screens/list_students_screen.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
@@ -10,13 +12,13 @@ import 'package:flutter_application_1/screens/viajes_screen1.dart';
 import 'package:flutter_application_1/screens/viajes_screen3.dart';
 import 'package:flutter_application_1/utils/global_values.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
-import 'package:flutter_application_1/utils/theme_settings.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Inicializar el tema
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform
+  );
+
   await GlobalValues.initializeTheme();
   
   // Verificar si hay una sesión activa y si se debe mantener

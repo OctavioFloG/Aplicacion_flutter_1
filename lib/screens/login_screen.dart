@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/database/user_databa.dart';
-import 'package:flutter_application_1/screens/dashboard_screen.dart';
 import 'package:flutter_application_1/screens/sign_up_screen.dart';
 import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:flutter_application_1/services/auth_firebase.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,10 +13,17 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  AuthFirebase? auth;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final UserDatabase _database = UserDatabase();
   bool _isLogin = true;
+
+  @override
+  void initState() {
+    super.initState();
+    auth = AuthFirebase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: Container(
         height: double.infinity, // Altura completa
-        width: double.infinity,  // Ancho completo
+        width: double.infinity, // Ancho completo
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/wallpaper.jpg'),
@@ -76,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () async {
                           final email = _emailController.text;
                           final password = _passwordController.text;
-                  
+
                           if (email.isEmpty || password.isEmpty) {
                             ArtSweetAlert.show(
                               context: context,
@@ -89,33 +96,49 @@ class _LoginScreenState extends State<LoginScreen> {
                             return;
                           }
                           if (_isLogin) {
-                            final userData =
-                                await _database.login(email, password);
-                            if (userData != null) {
-                              await SessionManager.setLoginDetails(
-                                email,
-                                nombre: userData['nombre'],
-                                imagePath: userData['imagePath'],
-                              );
-                              // Establecer que el usuario está logueado y mantener la sesión
-                              await SessionManager.setLoggedIn(true);
-                              await SessionManager.setKeepSession(true);
-                              
-                              // Usar pushReplacement para evitar volver al login
-                              Navigator.pushReplacementNamed(context, '/dash');
-                            } else {
-                              ArtSweetAlert.show(
-                                context: context,
-                                artDialogArgs: ArtDialogArgs(
-                                  type: ArtSweetAlertType.danger,
-                                  title: "Error",
-                                  text: "Credenciales incorrectas",
-                                ),
-                              );
-                            }
+                            auth?.loginUser(email, password).then(
+                              (value) {
+                                if (value) {
+                                  Navigator.pushReplacementNamed(
+                                      context, '/dash');
+                                } else {
+                                  ArtSweetAlert.show(
+                                    context: context,
+                                    artDialogArgs: ArtDialogArgs(
+                                      type: ArtSweetAlertType.danger,
+                                      title: "Error",
+                                      text: "Credenciales incorrectas",
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                            //f inal userData = await _database.login(email, password);
+                            // if (userData != null) {
+                            //   await SessionManager.setLoginDetails(
+                            //     email,
+                            //     // nombre: userData['nombre'],
+                            //     // imagePath: userData['imagePath'],
+                            //   );
+                            //   // Establecer que el usuario está logueado y mantener la sesión
+                            //   await SessionManager.setLoggedIn(true);
+                            //   await SessionManager.setKeepSession(true);
+
+                            //   Navigator.pushReplacementNamed(context, '/dash');
+                            // } else {
+                            //   ArtSweetAlert.show(
+                            //     context: context,
+                            //     artDialogArgs: ArtDialogArgs(
+                            //       type: ArtSweetAlertType.danger,
+                            //       title: "Error",
+                            //       text: "Credenciales incorrectas",
+                            //     ),
+                            //   );
+                            // }
                           }
                         },
-                        child: Text(_isLogin ? 'Iniciar Sesión' : 'Registrarse'),
+                        child:
+                            Text(_isLogin ? 'Iniciar Sesión' : 'Registrarse'),
                       ),
                       TextButton(
                         onPressed: () {

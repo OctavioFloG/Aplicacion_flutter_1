@@ -146,7 +146,11 @@ class ViajesScreen3 extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: backSvg,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: backSvg),
                         ),
                       ),
                     ),
