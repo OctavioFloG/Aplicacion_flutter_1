@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_firebase.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_application_1/database/user_databa.dart';
+// import 'package:flutter_application_1/database/user_databa.dart';
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
 
@@ -20,7 +20,7 @@ class _SignUpState extends State<SignUpScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final UserDatabase _database = UserDatabase();
+  // final UserDatabase _database = UserDatabase();
 
   @override
   void initState() {
