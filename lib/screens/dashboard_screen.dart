@@ -98,6 +98,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             ListTile(
+              title: Text("Todo Firebase"),
+              subtitle: Text("Firebase practica"),
+              leading: Icon(Icons.facebook),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () => Navigator.pushNamed(context, "/todof"),
+            ),
+            ListTile(
               title: Text("Práctica Figma"),
               subtitle: Text("Frontend App"),
               leading: Icon(Icons.design_services),

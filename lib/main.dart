@@ -6,6 +6,7 @@ import 'package:flutter_application_1/screens/list_students_screen.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
 import 'package:flutter_application_1/screens/sign_up_screen.dart';
 import 'package:flutter_application_1/screens/splash_screen.dart';
+import 'package:flutter_application_1/screens/todo_firebase_screen.dart';
 import 'package:flutter_application_1/screens/todo_screen.dart';
 import 'package:flutter_application_1/screens/viajes_screen2.dart';
 import 'package:flutter_application_1/screens/viajes_screen1.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_application_1/utils/session_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform
   );
@@ -24,8 +26,8 @@ void main() async {
   // Verificar si hay una sesión activa y si se debe mantener
   final isLoggedIn = await SessionManager.isLoggedIn();
   final keepSession = await SessionManager.getKeepSession();
-  
   final initialRoute = (isLoggedIn && keepSession) ? '/dash' : '/login';
+  //======================================================
   
   runApp(MyApp(initialRoute: initialRoute));
 }
@@ -59,6 +61,7 @@ class MyApp extends StatelessWidget {
             '/dash': (context) => const DashboardScreen(),
             '/list': (context) => const ListStudentsScreen(),
             '/todo': (context) => const TodoScreen(),
+            '/todof': (context) => const TodoFirebaseScreen(),
             '/signup': (context) => const SignUpScreen(),
             '/viajes1': (context) => const ViajesScreen1(),
             '/viajes2': (context) => const ViajesScreen2(),
