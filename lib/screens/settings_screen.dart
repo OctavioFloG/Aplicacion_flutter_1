@@ -105,6 +105,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     });
 
+    // Actualizar los colores actuales
+    ThemeSettings.currentColors = {
+      'primary': _primaryColor,
+      'secondary': _primaryColor.withOpacity(0.7),
+      'surface': _surfaceColor,
+      'error': Colors.red,
+      'background': _surfaceColor,
+      'container': _containerColor,
+      'text': _textColor,
+    };
+
+    // Guardar los colores personalizados
     await ThemeSettings.saveThemePreferences(
       themeMode: 'custom',
       primaryColor: _primaryColor,
@@ -114,9 +126,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
       fontFamily: _selectedFont,
     );
 
-    // Forzar la actualización del tema inmediatamente
-    final updatedTheme = await ThemeSettings.loadCustomTheme();
-    GlobalValues.themeApp.value = updatedTheme;
+    try {
+      // Cargar y aplicar el tema actualizado
+      ThemeData updatedTheme = await ThemeSettings.loadCustomTheme();
+      // Aplicar la fuente actual
+      updatedTheme = await ThemeSettings.buildThemeWithFont(updatedTheme, _selectedFont);
+      // Actualizar el tema global
+      GlobalValues.themeApp.value = updatedTheme;
+    } catch (e) {
+      print('Error al actualizar el tema: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al actualizar el color')),
+        );
+      }
+    }
   }
 
   @override
@@ -284,19 +308,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _currentTheme = value;
     });
 
-    switch (value) {
-      case 'light':
-        await ThemeSettings.updateThemeMode(value);
-        GlobalValues.themeApp.value = ThemeSettings.lightTheme();
-        break;
-      case 'dark':
-        await ThemeSettings.updateThemeMode(value);
-        GlobalValues.themeApp.value = ThemeSettings.darkTheme();
-        break;
-      case 'custom':
-        final customTheme = await ThemeSettings.loadCustomTheme();
-        GlobalValues.themeApp.value = customTheme;
-        break;
+    try {
+      // Guardar el modo del tema
+      await ThemeSettings.updateThemeMode(value);
+
+      ThemeData updatedTheme;
+      
+      switch (value) {
+        case 'light':
+          ThemeSettings.currentColors = Map.from(ThemeSettings.lightColors);
+          updatedTheme = ThemeSettings.lightTheme();
+          break;
+        case 'dark':
+          ThemeSettings.currentColors = Map.from(ThemeSettings.darkColors);
+          updatedTheme = ThemeSettings.darkTheme();
+          break;
+        case 'custom':
+          // Usar los colores actuales almacenados en el state
+          ThemeSettings.currentColors = {
+            'primary': _primaryColor,
+            'secondary': _primaryColor.withOpacity(0.7),
+            'surface': _surfaceColor,
+            'error': Colors.red,
+            'background': _surfaceColor,
+            'container': _containerColor,
+            'text': _textColor,
+          };
+          
+          // Guardar los colores personalizados
+          await ThemeSettings.saveThemePreferences(
+            themeMode: 'custom',
+            primaryColor: _primaryColor,
+            surfaceColor: _surfaceColor,
+            textColor: _textColor,
+            containerColor: _containerColor,
+            fontFamily: _selectedFont,
+          );
+          
+          updatedTheme = await ThemeSettings.loadCustomTheme();
+          break;
+        default:
+          updatedTheme = ThemeSettings.lightTheme();
+      }
+
+      // Aplicar la fuente actual al tema
+      updatedTheme = await ThemeSettings.buildThemeWithFont(updatedTheme, _selectedFont);
+
+      // Actualizar el tema global
+      GlobalValues.themeApp.value = updatedTheme;
+    } catch (e) {
+      print('Error al actualizar el tema: $e');
+      // Mostrar mensaje de error si algo falla
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al actualizar el tema')),
+        );
+      }
     }
   }
 }

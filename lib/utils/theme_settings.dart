@@ -155,45 +155,45 @@ class ThemeSettings {
     );
   }
 
+  static Future<ThemeData> buildThemeWithFont(ThemeData baseTheme, String fontFamily) async {
+    // Obtener la fuente de Google Fonts y aplicarla al TextTheme
+    final updatedTextTheme = GoogleFonts.getTextTheme(
+      fontFamily,
+      baseTheme.textTheme,
+    );
+
+    return baseTheme.copyWith(
+      textTheme: updatedTextTheme,
+      primaryTextTheme: updatedTextTheme,
+    );
+  }
+
   static Future<ThemeData> loadCustomTheme() async {
     final prefs = await SharedPreferences.getInstance();
+    final currentFont = prefs.getString(_fontFamilyKey) ?? 'Roboto';
     
-    final primaryColor = Color(prefs.getInt(_primaryColorKey) ?? Colors.blue.value);
-    final surfaceColor = Color(prefs.getInt(_surfaceColorKey) ?? Colors.white.value);
-    final textColor = Color(prefs.getInt(_textColorKey) ?? Colors.black.value);
-    final containerColor = Color(prefs.getInt(_containerColorKey) ?? Colors.white.value);
-    final fontFamily = prefs.getString(_fontFamilyKey) ?? 'Roboto';
-
-    return ThemeData(
+    // Crear tema base con los colores personalizados
+    final customTheme = ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: surfaceColor,
-      textTheme: GoogleFonts.getTextTheme(
-        fontFamily,
-        ThemeData.light().textTheme,
-      ).apply(
-        bodyColor: textColor,
-        displayColor: textColor,
+      scaffoldBackgroundColor: currentColors['surface'],
+      colorScheme: ColorScheme(
+        brightness: Brightness.light,
+        primary: currentColors['primary']!,
+        onPrimary: Colors.white,
+        secondary: currentColors['secondary']!,
+        onSecondary: Colors.white,
+        error: currentColors['error']!,
+        onError: Colors.white,
+        background: currentColors['background']!,
+        onBackground: currentColors['text']!,
+        surface: currentColors['surface']!,
+        onSurface: currentColors['text']!,
       ),
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
-        primary: primaryColor,
-        surface: surfaceColor,
-        onSurface: textColor,
-        onPrimary: textColor,
-      ),
-      cardTheme: CardTheme(
-        color: containerColor,
-      ),
-      dialogTheme: DialogTheme(
-        backgroundColor: containerColor,
-        contentTextStyle: TextStyle(color: textColor),
-        titleTextStyle: TextStyle(color: textColor),
-      ),
-      popupMenuTheme: PopupMenuThemeData(
-        color: containerColor,
-        textStyle: TextStyle(color: textColor),
-      ),
+      // ... resto de las propiedades del tema
     );
+
+    // Aplicar la fuente al tema
+    return buildThemeWithFont(customTheme, currentFont);
   }
 
   static Future<void> saveThemePreferences({
@@ -246,9 +246,23 @@ class ThemeSettings {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_fontFamilyKey, fontFamily);
     
-    // Actualizar el tema actual con la nueva fuente
-    final currentTheme = await getTheme();
-    GlobalValues.themeApp.value = currentTheme;
+    // Obtener el tema actual y reconstruirlo con la nueva fuente
+    final currentThemeMode = await getCurrentThemeMode();
+    ThemeData baseTheme;
+    
+    switch (currentThemeMode) {
+      case 'dark':
+        baseTheme = darkTheme();
+        break;
+      case 'custom':
+        baseTheme = await loadCustomTheme();
+        break;
+      default:
+        baseTheme = lightTheme();
+    }
+
+    final updatedTheme = await buildThemeWithFont(baseTheme, fontFamily);
+    GlobalValues.themeApp.value = updatedTheme;
   }
 
   static Future<Map<String, Color>> getCustomThemeColors() async {
