@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/apis/popular_api.dart';
 import 'package:flutter_application_1/screens/sign_up_screen.dart';
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:flutter_application_1/services/auth_firebase.dart';
@@ -78,6 +79,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: () async {
+                          final popular = PopularApi();
+                          popular.getHttpPopular();
                           final email = _emailController.text;
                           final password = _passwordController.text;
 
