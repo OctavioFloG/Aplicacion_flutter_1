@@ -157,7 +157,7 @@ class _TodoScreenState extends State<TodoScreen> {
                 ElevatedButton(
                   onPressed: (){
                     if( idTodo == 0 ){
-                      database!.INSERTAR('todo', {
+                      database.INSERTAR('todo', {
                         'titleTodo' : conTitle.text,
                         'dscTodo' : conDesc.text,
                         'dateTodo' : conDate.text,
@@ -176,7 +176,7 @@ class _TodoScreenState extends State<TodoScreen> {
                         }
                       },);
                     }else{
-                      database!.UPDATE('todo', {
+                      database.UPDATE('todo', {
                         'idTodo' : idTodo,
                         'titleTodo' : conTitle.text,
                         'dscTodo' : conDesc.text,

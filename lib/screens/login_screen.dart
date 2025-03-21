@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/database/user_databa.dart';
 import 'package:flutter_application_1/screens/sign_up_screen.dart';
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:flutter_application_1/services/auth_firebase.dart';
-import 'package:flutter_application_1/utils/session_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,7 +14,6 @@ class _LoginScreenState extends State<LoginScreen> {
   AuthFirebase? auth;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final UserDatabase _database = UserDatabase();
   bool _isLogin = true;
 
   @override
