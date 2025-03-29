@@ -2,8 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firebase_options.dart';
 import 'package:flutter_application_1/screens/dashboard_screen.dart';
+import 'package:flutter_application_1/screens/detail_popular_screen.dart';
 import 'package:flutter_application_1/screens/list_students_screen.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:flutter_application_1/screens/popular_screen.dart';
 import 'package:flutter_application_1/screens/sign_up_screen.dart';
 import 'package:flutter_application_1/screens/splash_screen.dart';
 import 'package:flutter_application_1/screens/todo_firebase_screen.dart';
@@ -63,6 +65,8 @@ class MyApp extends StatelessWidget {
             '/todo': (context) => const TodoScreen(),
             '/todof': (context) => const TodoFirebaseScreen(),
             '/signup': (context) => const SignUpScreen(),
+            '/popular': (context) => const PopularScreen(),
+            '/detail': (context) => DetailPopularScreen(),
             '/viajes1': (context) => const ViajesScreen1(),
             '/viajes2': (context) => const ViajesScreen2(),
             '/viajes3': (context) => const ViajesScreen3(),

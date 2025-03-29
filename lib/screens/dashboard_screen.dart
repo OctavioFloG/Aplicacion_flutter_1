@@ -98,9 +98,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             ListTile(
+              title: Text("Popular TheMovieDB"),
+              subtitle: Text("Práctica consumo de API"),
+              leading: Icon(Icons.movie),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () => Navigator.pushNamed(context, "/popular"),
+            ),
+            ListTile(
               title: Text("Todo Firebase"),
               subtitle: Text("Firebase practica"),
-              leading: Icon(Icons.facebook),
+              leading: Icon(Icons.book),
               trailing: Icon(Icons.chevron_right),
               onTap: () => Navigator.pushNamed(context, "/todof"),
             ),
