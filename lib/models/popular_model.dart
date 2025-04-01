@@ -27,16 +27,16 @@ class PopularModel {
 
   factory PopularModel.fromMap(Map<String, dynamic> popular) {
     return PopularModel(
-        backdropPath: popular['backdropPath']??"hola",
+        backdropPath: popular['backdrop_path']??"",
         id: popular['id']??0,
-        originalLanguage: popular['originalLanguage']??"",
-        originalTitle: popular['originalTitle']??"",
+        originalLanguage: popular['original_language']??"",
+        originalTitle: popular['original_title']??"",
         overview: popular['overview']??"",
         popularity: popular['popularity']??0,
-        posterPath: popular['posterPath']??"",
-        releaseDate: popular['releaseDate']??"",
+        posterPath: popular['poster_path']??"",
+        releaseDate: popular['release_date']??"",
         title: popular['title']??"",
-        voteAverage: popular['voteAverage']??0  ,
-        voteCount: popular['voteCount']??0);
+        voteAverage: popular['vote_average']??0  ,
+        voteCount: popular['vote_count']??0);
   }
 }

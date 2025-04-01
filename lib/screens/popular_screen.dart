@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pmsn2025/apis/popular_api.dart';
-import 'package:pmsn2025/models/popular_model.dart';
-import 'package:pmsn2025/screens/detail_popular_screen.dart';
+import 'package:flutter_application_1/apis/popular_api.dart';
+import 'package:flutter_application_1/models/popular_model.dart';
 
 class PopularScreen extends StatefulWidget {
   const PopularScreen({super.key});
@@ -55,24 +54,19 @@ class _PopularScreen extends State<PopularScreen> {
     return InkWell(
       onTap: () {
         Navigator.pushNamed(context, '/detail', arguments: popular);
-        //Navigator.push(context, MaterialPageRoute(builder: (context) => DetailPopularScreen(popularModel: popular,),));
       },
       child: Container(
       height: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        /*image: DecorationImage(
-          fit: BoxFit.cover,
-          image: NetworkImage('https://image.tmdb.org/t/p/w500/${popular.posterPath}')
-        )*/
-      ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: FadeInImage(
-            fadeInDuration: Duration(seconds: 3),
-            fit: BoxFit.cover,
-            placeholder: AssetImage('assets/loading.gif'),
-            image: NetworkImage('https://image.tmdb.org/t/p/w500/${popular.posterPath}')
+          child: Hero(
+            tag: "https://image.tmdb.org/t/p/w500${popular.posterPath}",
+            child: FadeInImage(
+              fadeInDuration: Duration(seconds: 3),
+              fit: BoxFit.cover,
+              placeholder: AssetImage('assets/lding.gif'),
+              image: NetworkImage('https://image.tmdb.org/t/p/w500${popular.posterPath}')
+            ),
           ),
         ),
       ),
