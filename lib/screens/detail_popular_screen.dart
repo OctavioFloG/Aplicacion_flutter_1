@@ -41,11 +41,6 @@ class _DetailPopularScreenState extends State<DetailPopularScreen> {
               Colors.white,
               Colors.blue,
             ]
-                // image: DecorationImage(
-                //     opacity: .5,
-                //     image: NetworkImage(
-                //         "https://image.tmdb.org/t/p/w500${popular.posterPath}")
-
                 )),
         child: ListView(
           shrinkWrap: true,
