@@ -113,7 +113,7 @@ class _TodoScreenState extends State<TodoScreen> {
       builder: (context) {
         return AlertDialog(
           title: idTodo == 0 ? Text('Add Task') : Text('Edit Task'),
-          content: Container(
+          content: SizedBox(
             height: 300,
             width: 310,
             child: ListView(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_application_1/view/item_category_button.dart';
 import 'package:flutter_application_1/view/item_popular_hotels.dart';
 import 'package:flutter_application_1/view/item_recommended_hotels.dart';

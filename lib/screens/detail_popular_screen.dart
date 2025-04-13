@@ -79,7 +79,7 @@ class _DetailPopularScreenState extends State<DetailPopularScreen> {
               child: Text(popular.overview),
             ),
             space,
-            Container(
+            SizedBox(
               height: 100,
               child: Column(children: [
                 StarRating(rating: popular.voteAverage / 2),

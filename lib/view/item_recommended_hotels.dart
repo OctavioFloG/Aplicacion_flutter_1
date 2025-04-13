@@ -40,7 +40,7 @@ class ItemRecommendedHotels extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
+            SizedBox(
               width: 196,
               height: 102,
               child: Stack(

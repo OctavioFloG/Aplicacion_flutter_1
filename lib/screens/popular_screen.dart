@@ -55,7 +55,7 @@ class _PopularScreen extends State<PopularScreen> {
       onTap: () {
         Navigator.pushNamed(context, '/detail', arguments: popular);
       },
-      child: Container(
+      child: SizedBox(
       height: 200,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),

@@ -97,7 +97,7 @@ class _TodoFirebaseScreenState extends State<TodoFirebaseScreen> {
     return showDialog(
       context: context,
       builder: (context) {
-        var btnText;
+        String btnText;
         if (idTodo == "0") {
           btnText = "Añadir";
         } else {
@@ -105,7 +105,7 @@ class _TodoFirebaseScreenState extends State<TodoFirebaseScreen> {
         }
         return AlertDialog(
           title: idTodo == 0 ? Text('Add Task') : Text('Edit Task'),
-          content: Container(
+          content: SizedBox(
             height: 340,
             width: 310,
             child: ListView(

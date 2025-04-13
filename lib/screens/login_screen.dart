@@ -14,7 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   AuthFirebase? auth;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLogin = true;
+  final bool _isLogin = true;
 
   @override
   void initState() {

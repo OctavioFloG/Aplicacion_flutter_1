@@ -184,8 +184,6 @@ class ThemeSettings {
         onSecondary: Colors.white,
         error: currentColors['error']!,
         onError: Colors.white,
-        background: currentColors['background']!,
-        onBackground: currentColors['text']!,
         surface: currentColors['surface']!,
         onSurface: currentColors['text']!,
       ),
