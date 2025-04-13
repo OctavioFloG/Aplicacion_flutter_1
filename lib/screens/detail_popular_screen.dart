@@ -3,6 +3,7 @@ import 'package:flutter_application_1/models/popular_model.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
+// ignore: must_be_immutable
 class DetailPopularScreen extends StatefulWidget {
   DetailPopularScreen({super.key, this.popularModel});
 
