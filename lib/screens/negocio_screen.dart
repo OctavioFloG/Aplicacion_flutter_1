@@ -1,3 +1,5 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -43,11 +45,13 @@ class VentaServicio {
 }
 
 class NegocioScreen extends StatefulWidget {
+  const NegocioScreen({super.key});
   @override
   _NegocioScreenState createState() => _NegocioScreenState();
 }
 
 class _NegocioScreenState extends State<NegocioScreen> {
+  
   bool _showCalendar = false; // Controla si se muestra lista o calendario
   List<VentaServicio> _ventasServicios = []; // Lista de datos en memoria
   Map<DateTime, List<VentaServicio>> _eventos = {};
@@ -195,13 +199,13 @@ class _NegocioScreenState extends State<NegocioScreen> {
                     Color color;
                     switch (venta.estatus) {
                       case Estatus.porCumplir:
-                        color = Colors.green;
+                        color = Colors.grey;
                         break;
                       case Estatus.cancelado:
                         color = Colors.red;
                         break;
                       case Estatus.completado:
-                        color = Colors.white;
+                        color = Colors.green;
                         break;
                     }
                     return Container(
@@ -212,6 +216,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
                         color: color,
                         shape: BoxShape.circle,
                       ),
+                      
                     );
                   }).toList(),
                 );
@@ -244,10 +249,10 @@ class _NegocioScreenState extends State<NegocioScreen> {
           ),
           leading: CircleAvatar(
             backgroundColor: venta.estatus == Estatus.porCumplir
-                ? Colors.green
+                ? Colors.grey
                 : venta.estatus == Estatus.cancelado
                     ? Colors.red
-                    : Colors.white,
+                    : Colors.green,
             radius: 10,
           ),
         );
