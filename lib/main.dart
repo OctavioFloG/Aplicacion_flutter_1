@@ -5,6 +5,7 @@ import 'package:flutter_application_1/screens/dashboard_screen.dart';
 import 'package:flutter_application_1/screens/detail_popular_screen.dart';
 import 'package:flutter_application_1/screens/list_students_screen.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:flutter_application_1/screens/negocio_screen.dart';
 import 'package:flutter_application_1/screens/popular_screen.dart';
 import 'package:flutter_application_1/screens/sign_up_screen.dart';
 import 'package:flutter_application_1/screens/splash_screen.dart';
@@ -70,6 +71,8 @@ class MyApp extends StatelessWidget {
             '/viajes1': (context) => const ViajesScreen1(),
             '/viajes2': (context) => const ViajesScreen2(),
             '/viajes3': (context) => const ViajesScreen3(),
+            '/negocio': (context) => NegocioScreen(),
+
           },
         );
       },

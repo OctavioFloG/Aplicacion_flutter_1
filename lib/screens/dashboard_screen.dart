@@ -98,6 +98,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             ListTile(
+              title: Text("Negocio Productos Calendar"),
+              subtitle: Text("Práctica consumo de API"),
+              leading: Icon(Icons.business_center_rounded),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () => Navigator.pushNamed(context, "/negocio"),
+            ),
+            ListTile(
               title: Text("Popular TheMovieDB"),
               subtitle: Text("Práctica consumo de API"),
               leading: Icon(Icons.movie),
