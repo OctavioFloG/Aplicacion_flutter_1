@@ -1,10 +1,16 @@
+enum EstadoVenta {
+  porCumplir,
+  cancelado,
+  completado
+}
+
 class VentaModel {
   int idVenta;
   int idProducto;
   int cantidad;
   String fechaVenta;
   String fechaEntrega;
-  String status;
+  EstadoVenta status;
   
   VentaModel({
     required this.idVenta,
@@ -22,7 +28,21 @@ class VentaModel {
       cantidad: map['cantidad'],
       fechaVenta: map['fecha_venta'],
       fechaEntrega: map['fecha_entrega'],
-      status: map['status'],
+      status: EstadoVenta.values.firstWhere(
+        (e) => e.toString().split('.').last == map['status'],
+        orElse: () => EstadoVenta.porCumplir
+      ),
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'idVenta': idVenta,
+      'idProducto': idProducto,
+      'cantidad': cantidad,
+      'fecha_venta': fechaVenta,
+      'fecha_entrega': fechaEntrega,
+      'status': status.toString().split('.').last,
+    };
   }
 }

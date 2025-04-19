@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/sign_up_screen.dart';
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:flutter_application_1/services/auth_firebase.dart';
+import 'package:flutter_application_1/database/user_databa.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,6 +14,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   AuthFirebase? auth;
+  final UserDatabase _localDb = UserDatabase();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final bool _isLogin = true;
@@ -20,6 +23,31 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     auth = AuthFirebase();
+  }
+
+  Future<bool> _checkInternetConnection() async {
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult != ConnectivityResult.none;
+  }
+
+  Future<bool> _authenticateUser(String email, String password) async {
+    bool hasInternet = await _checkInternetConnection();
+
+    if (hasInternet) {
+      try {
+        // Intenta primero con Firebase
+        bool firebaseResult = await auth?.loginUser(email, password) ?? false;
+        if (firebaseResult) {
+          return true;
+        }
+      } catch (e) {
+        print('Error en autenticación Firebase: $e');
+      }
+    }
+
+    // Si Firebase falla o no hay internet, intenta con la base local
+    final localUser = await _localDb.login(email, password);
+    return localUser != null;
   }
 
   @override
@@ -92,46 +120,21 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                             return;
                           }
-                          if (_isLogin) {
-                            auth?.loginUser(email, password).then(
-                              (value) {
-                                if (value) {
-                                  Navigator.pushReplacementNamed(
-                                      context, '/dash');
-                                } else {
-                                  ArtSweetAlert.show(
-                                    context: context,
-                                    artDialogArgs: ArtDialogArgs(
-                                      type: ArtSweetAlertType.danger,
-                                      title: "Error",
-                                      text: "Credenciales incorrectas",
-                                    ),
-                                  );
-                                }
-                              },
-                            );
-                            //f inal userData = await _database.login(email, password);
-                            // if (userData != null) {
-                            //   await SessionManager.setLoginDetails(
-                            //     email,
-                            //     // nombre: userData['nombre'],
-                            //     // imagePath: userData['imagePath'],
-                            //   );
-                            //   // Establecer que el usuario está logueado y mantener la sesión
-                            //   await SessionManager.setLoggedIn(true);
-                            //   await SessionManager.setKeepSession(true);
 
-                            //   Navigator.pushReplacementNamed(context, '/dash');
-                            // } else {
-                            //   ArtSweetAlert.show(
-                            //     context: context,
-                            //     artDialogArgs: ArtDialogArgs(
-                            //       type: ArtSweetAlertType.danger,
-                            //       title: "Error",
-                            //       text: "Credenciales incorrectas",
-                            //     ),
-                            //   );
-                            // }
+                          bool isAuthenticated =
+                              await _authenticateUser(email, password);
+
+                          if (isAuthenticated) {
+                            Navigator.pushReplacementNamed(context, '/dash');
+                          } else {
+                            ArtSweetAlert.show(
+                              context: context,
+                              artDialogArgs: ArtDialogArgs(
+                                type: ArtSweetAlertType.danger,
+                                title: "Error",
+                                text: "Credenciales incorrectas",
+                              ),
+                            );
                           }
                         },
                         child:

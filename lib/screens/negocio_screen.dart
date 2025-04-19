@@ -3,46 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-
-// Modelo para Venta/Servicio
-enum Estatus { porCumplir, cancelado, completado }
-
-class VentaServicio {
-  final int? id;
-  final String nombre;
-  final double precio;
-  final int stock;
-  final DateTime fecha;
-  final Estatus estatus;
-
-  VentaServicio({
-    this.id,
-    required this.nombre,
-    required this.precio,
-    required this.stock,
-    required this.fecha,
-    required this.estatus,
-  });
-
-  // Copia para actualizar
-  VentaServicio copyWith({
-    int? id,
-    String? nombre,
-    double? precio,
-    int? stock,
-    DateTime? fecha,
-    Estatus? estatus,
-  }) {
-    return VentaServicio(
-      id: id ?? this.id,
-      nombre: nombre ?? this.nombre,
-      precio: precio ?? this.precio,
-      stock: stock ?? this.stock,
-      fecha: fecha ?? this.fecha,
-      estatus: estatus ?? this.estatus,
-    );
-  }
-}
+import 'package:flutter_application_1/database/negocio_databa.dart';
+import 'package:flutter_application_1/models/venta_model.dart';
 
 class NegocioScreen extends StatefulWidget {
   const NegocioScreen({super.key});
@@ -50,71 +12,44 @@ class NegocioScreen extends StatefulWidget {
   _NegocioScreenState createState() => _NegocioScreenState();
 }
 
+enum EstadoVenta { porCumplir, completado, cancelado }
+
 class _NegocioScreenState extends State<NegocioScreen> {
-  
-  bool _showCalendar = false; // Controla si se muestra lista o calendario
-  List<VentaServicio> _ventasServicios = []; // Lista de datos en memoria
-  Map<DateTime, List<VentaServicio>> _eventos = {};
+  final NegocioDataba _db = NegocioDataba();
+  bool _showCalendar = false;
+  List<VentaModel> _ventas = [];
+  Map<DateTime, List<VentaModel>> _eventos = {};
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  int _nextId = 1; // Para generar IDs únicos
 
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
-    // Datos de ejemplo
-    _ventasServicios = [
-      VentaServicio(
-        id: _nextId++,
-        nombre: 'Servicio de Limpieza',
-        precio: 50.0,
-        stock: 10,
-        fecha: DateTime.now(),
-        estatus: Estatus.porCumplir,
-      ),
-      VentaServicio(
-        id: _nextId++,
-        nombre: 'Venta de Producto A',
-        precio: 25.99,
-        stock: 5,
-        fecha: DateTime.now().add(Duration(days: 1)),
-        estatus: Estatus.porCumplir,
-      ),
-      VentaServicio(
-        id: _nextId++,
-        nombre: 'Servicio Cancelado',
-        precio: 100.0,
-        stock: 0,
-        fecha: DateTime.now(),
-        estatus: Estatus.cancelado,
-      ),
-      VentaServicio(
-        id: _nextId++,
-        nombre: 'Servicio Completado',
-        precio: 75.0,
-        stock: 3,
-        fecha: DateTime.now().subtract(Duration(days: 1)),
-        estatus: Estatus.completado,
-      ),
-    ];
-    _cargarEventos();
+    _cargarDatos();
   }
 
-  // Cargar eventos para el calendario
+  Future<void> _cargarDatos() async {
+    final datos = await _db.getAllVentas();
+    setState(() {
+      _ventas = datos.map((dato) => VentaModel.fromMap(dato)).toList();
+      _cargarEventos();
+    });
+  }
+
   void _cargarEventos() {
     setState(() {
       _eventos = {};
-      for (var venta in _ventasServicios) {
-        final date = DateTime(venta.fecha.year, venta.fecha.month, venta.fecha.day);
-        _eventos[date] = _eventos[date] ?? [];
-        _eventos[date]!.add(venta);
+      for (var venta in _ventas) {
+        final date = DateTime.parse(venta.fechaEntrega);
+        final fechaKey = DateTime(date.year, date.month, date.day);
+        _eventos[fechaKey] = _eventos[fechaKey] ?? [];
+        _eventos[fechaKey]!.add(venta);
       }
     });
   }
 
-  // Obtener eventos para un día específico
-  List<VentaServicio> _getEventosParaDia(DateTime day) {
+  List<VentaModel> _getEventosParaDia(DateTime day) {
     final date = DateTime(day.year, day.month, day.day);
     return _eventos[date] ?? [];
   }
@@ -143,36 +78,33 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
-  // Vista de lista
   Widget _buildListView() {
-    final pendientes = _ventasServicios.where((v) => v.estatus == Estatus.porCumplir).toList();
+    final pendientes = _ventas.where((v) => v.status.toString() == 'porCumplir').toList();
     if (pendientes.isEmpty) {
-      return Center(child: Text('No hay ventas/servicios pendientes.'));
+      return Center(child: Text('No hay ventas pendientes.'));
     }
     return ListView.builder(
       itemCount: pendientes.length,
       itemBuilder: (context, index) {
         final venta = pendientes[index];
         return ListTile(
-          title: Text(venta.nombre),
+          title: Text('Venta #${venta.idVenta}'),
           subtitle: Text(
-            'Precio: \$${venta.precio.toStringAsFixed(2)} | Stock: ${venta.stock} | Fecha: ${DateFormat('dd/MM/yyyy').format(venta.fecha)}',
+            'Cantidad: ${venta.cantidad} | Entrega: ${venta.fechaEntrega} | Producto ID: ${venta.idProducto}',
           ),
-          trailing: IconButton(
-            icon: Icon(Icons.delete, color: Colors.red),
-            onPressed: () {
-              setState(() {
-                _ventasServicios.removeWhere((v) => v.id == venta.id);
-                _cargarEventos();
-              });
-            },
+          leading: CircleAvatar(
+            backgroundColor: venta.status.toString() == 'EstadoVenta.porCumplir'
+                ? Colors.grey 
+                : venta.status.toString() == 'EstadoVenta.completado'
+                    ? Colors.green 
+                    : Colors.red,
+            radius: 10,
           ),
         );
       },
     );
   }
 
-  // Vista de calendario
   Widget _buildCalendarView() {
     return Column(
       children: [
@@ -195,17 +127,18 @@ class _NegocioScreenState extends State<NegocioScreen> {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: events.map((event) {
-                    final venta = event as VentaServicio;
+                    final venta = event as VentaModel;
+                    
                     Color color;
-                    switch (venta.estatus) {
-                      case Estatus.porCumplir:
-                        color = Colors.grey;
+                    switch (venta.status.toString()) {
+                      case 'EstadoVenta.completado':
+                        color = Colors.green;
                         break;
-                      case Estatus.cancelado:
+                      case 'EstadoVenta.cancelado':
                         color = Colors.red;
                         break;
-                      case Estatus.completado:
-                        color = Colors.green;
+                      default:
+                        color = Colors.grey;
                         break;
                     }
                     return Container(
@@ -216,7 +149,6 @@ class _NegocioScreenState extends State<NegocioScreen> {
                         color: color,
                         shape: BoxShape.circle,
                       ),
-                      
                     );
                   }).toList(),
                 );
@@ -232,27 +164,26 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
-  // Mostrar eventos del día seleccionado
   Widget _buildEventosDiaSeleccionado() {
     final eventos = _getEventosParaDia(_selectedDay!);
     if (eventos.isEmpty) {
-      return Center(child: Text('No hay ventas/servicios para este día.'));
+      return Center(child: Text('No hay ventas para este día.'));
     }
     return ListView.builder(
       itemCount: eventos.length,
       itemBuilder: (context, index) {
         final venta = eventos[index];
         return ListTile(
-          title: Text(venta.nombre),
+          title: Text('Entrega #${venta.idVenta}'),
           subtitle: Text(
-            'Precio: \$${venta.precio.toStringAsFixed(2)} | Stock: ${venta.stock} | Estatus: ${venta.estatus.toString().split('.').last}',
+            'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Producto ID: ${venta.idProducto}',
           ),
           leading: CircleAvatar(
-            backgroundColor: venta.estatus == Estatus.porCumplir
-                ? Colors.grey
-                : venta.estatus == Estatus.cancelado
-                    ? Colors.red
-                    : Colors.green,
+            backgroundColor: venta.status.toString() == 'EstadoVenta.porCumplir'
+                ? Colors.grey 
+                : venta.status.toString() == 'EstadoVenta.completado'
+                    ? Colors.green 
+                    : Colors.red,
             radius: 10,
           ),
         );
@@ -260,13 +191,11 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
-  // Formulario para agregar una nueva venta/servicio
   void _mostrarFormulario(BuildContext context) {
-    final _nombreController = TextEditingController();
-    final _precioController = TextEditingController();
-    final _stockController = TextEditingController();
-    DateTime _selectedDate = DateTime.now();
-    Estatus _selectedEstatus = Estatus.porCumplir;
+    final _cantidadController = TextEditingController();
+    final _idProductoController = TextEditingController();
+    DateTime _selectedFechaVenta = DateTime.now();
+    DateTime _selectedFechaEntrega = DateTime.now().add(Duration(days: 1));
 
     showDialog(
       context: context,
@@ -274,54 +203,59 @@ class _NegocioScreenState extends State<NegocioScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text('Agregar Venta/Servicio'),
+              title: Text('Nueva Venta'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
-                      controller: _nombreController,
-                      decoration: InputDecoration(labelText: 'Nombre'),
+                      controller: _idProductoController,
+                      decoration: InputDecoration(labelText: 'ID Producto'),
+                      keyboardType: TextInputType.number,
                     ),
                     TextField(
-                      controller: _precioController,
-                      decoration: InputDecoration(labelText: 'Precio'),
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    ),
-                    TextField(
-                      controller: _stockController,
-                      decoration: InputDecoration(labelText: 'Stock'),
+                      controller: _cantidadController,
+                      decoration: InputDecoration(labelText: 'Cantidad'),
                       keyboardType: TextInputType.number,
                     ),
                     ListTile(
-                      title: Text('Fecha: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}'),
+                      title: Text(
+                          'Fecha de Venta: ${DateFormat('dd/MM/yyyy').format(_selectedFechaVenta)}'),
                       trailing: Icon(Icons.calendar_today),
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: context,
-                          initialDate: _selectedDate,
+                          initialDate: _selectedFechaVenta,
                           firstDate: DateTime(2020),
                           lastDate: DateTime(2030),
                         );
                         if (picked != null) {
                           setDialogState(() {
-                            _selectedDate = picked;
+                            _selectedFechaVenta = picked;
+                            if (_selectedFechaEntrega.isBefore(_selectedFechaVenta)) {
+                              _selectedFechaEntrega =
+                                  _selectedFechaVenta.add(Duration(days: 1));
+                            }
                           });
                         }
                       },
                     ),
-                    DropdownButton<Estatus>(
-                      value: _selectedEstatus,
-                      items: Estatus.values.map((estatus) {
-                        return DropdownMenuItem(
-                          value: estatus,
-                          child: Text(estatus.toString().split('.').last),
+                    ListTile(
+                      title: Text(
+                          'Fecha de Entrega: ${DateFormat('dd/MM/yyyy').format(_selectedFechaEntrega)}'),
+                      trailing: Icon(Icons.event),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedFechaEntrega,
+                          firstDate: _selectedFechaVenta,
+                          lastDate: DateTime(2030),
                         );
-                      }).toList(),
-                      onChanged: (value) {
-                        setDialogState(() {
-                          _selectedEstatus = value!;
-                        });
+                        if (picked != null) {
+                          setDialogState(() {
+                            _selectedFechaEntrega = picked;
+                          });
+                        }
                       },
                     ),
                   ],
@@ -333,21 +267,19 @@ class _NegocioScreenState extends State<NegocioScreen> {
                   child: Text('Cancelar'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    if (_nombreController.text.isNotEmpty &&
-                        _precioController.text.isNotEmpty &&
-                        _stockController.text.isNotEmpty) {
-                      setState(() {
-                        _ventasServicios.add(VentaServicio(
-                          id: _nextId++,
-                          nombre: _nombreController.text,
-                          precio: double.parse(_precioController.text),
-                          stock: int.parse(_stockController.text),
-                          fecha: _selectedDate,
-                          estatus: _selectedEstatus,
-                        ));
-                        _cargarEventos();
-                      });
+                  onPressed: () async {
+                    if (_cantidadController.text.isNotEmpty &&
+                        _idProductoController.text.isNotEmpty) {
+                      final nuevaVenta = {
+                        'idProducto': int.parse(_idProductoController.text),
+                        'cantidad': int.parse(_cantidadController.text),
+                        'fecha_venta': DateFormat('yyyy-MM-dd').format(_selectedFechaVenta),
+                        'fecha_entrega': DateFormat('yyyy-MM-dd').format(_selectedFechaEntrega),
+                        'status': 'porCumplir',
+                      };
+
+                      await _db.insertVenta(nuevaVenta);
+                      await _cargarDatos();
                       Navigator.pop(context);
                     }
                   },

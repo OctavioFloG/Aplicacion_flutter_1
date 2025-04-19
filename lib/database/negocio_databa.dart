@@ -20,7 +20,7 @@ class NegocioDataba {
           idProducto INTEGER PRIMARY KEY,
           nombre VARCHAR(100),
           precio REAL,
-          stock INTEGER,
+          stock INTEGER
         )''');
         await db.execute('''CREATE TABLE venta (
           idVenta INTEGER PRIMARY KEY,
@@ -31,8 +31,36 @@ class NegocioDataba {
           status char(1),
           FOREIGN KEY (idProducto) REFERENCES producto(idProducto)
         )''');
+        // Insertar datos de prueba al crear la base de datos
+      await _insertarDatosPrueba(db);
       },
     );
+  }
+
+  // Datos de prueba
+  
+  Future<void> _insertarDatosPrueba(Database db) async {
+    // Función auxiliar para formatear fecha
+    String formatDate(DateTime date) {
+      return "${date.year}-${date.month.toString().padLeft(2,'0')}-${date.day.toString().padLeft(2,'0')}";
+    }
+
+    // Primero insertamos productos
+    await db.rawInsert('''
+      INSERT INTO producto (nombre, precio, stock) VALUES 
+      ('Servicio de Limpieza', 50.0, 10),
+      ('Servicio de Jardinería', 75.0, 5),
+      ('Servicio de Reparación', 100.0, 3)
+    ''');
+
+    // Luego insertamos ventas con solo fecha
+    await db.rawInsert('''
+      INSERT INTO venta (idProducto, cantidad, fecha_venta, fecha_entrega, status) VALUES 
+      (1, 2, '${formatDate(DateTime.now())}', '${formatDate(DateTime.now().add(Duration(days: 2)))}', 'porCumplir'),
+      (2, 1, '${formatDate(DateTime.now())}', '${formatDate(DateTime.now().add(Duration(days: 1)))}', 'cancelado'),
+      (3, 3, '${formatDate(DateTime.now().subtract(Duration(days: 1)))}', '${formatDate(DateTime.now().add(Duration(days: 3)))}', 'completado'),
+      (1, 1, '${formatDate(DateTime.now().add(Duration(days: 1)))}', '${formatDate(DateTime.now().add(Duration(days: 5)))}', 'porCumplir')
+    ''');
   }
 
   // CRUD de venta
@@ -58,7 +86,7 @@ class NegocioDataba {
   }
 
   // CRUD de producto
-  
+
   // Future<List<Map<String, dynamic>>> getAllProductos() async {
   //   Database? db = await database;
   //   return await db!.query('producto');
@@ -77,7 +105,5 @@ class NegocioDataba {
   // Future<int> deleteProducto(int id) async {
   //   Database? db = await database;
   //   return await db!.delete('producto', where: 'idProducto = ?', whereArgs: [id]);
-  // }
-
-  
+  // } 
 }
