@@ -31,7 +31,6 @@ class NegocioDataba {
           status char(1),
           FOREIGN KEY (idProducto) REFERENCES producto(idProducto)
         )''');
-        // Insertar datos de prueba al crear la base de datos
       await _insertarDatosPrueba(db);
       },
     );
@@ -44,16 +43,12 @@ class NegocioDataba {
     String formatDate(DateTime date) {
       return "${date.year}-${date.month.toString().padLeft(2,'0')}-${date.day.toString().padLeft(2,'0')}";
     }
-
-    // Primero insertamos productos
     await db.rawInsert('''
       INSERT INTO producto (nombre, precio, stock) VALUES 
       ('Servicio de Limpieza', 50.0, 10),
       ('Servicio de Jardinería', 75.0, 5),
       ('Servicio de Reparación', 100.0, 3)
     ''');
-
-    // Luego insertamos ventas con solo fecha
     await db.rawInsert('''
       INSERT INTO venta (idProducto, cantidad, fecha_venta, fecha_entrega, status) VALUES 
       (1, 2, '${formatDate(DateTime.now())}', '${formatDate(DateTime.now().add(Duration(days: 2)))}', 'porCumplir'),
