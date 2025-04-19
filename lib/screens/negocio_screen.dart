@@ -79,7 +79,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
   }
 
   Widget _buildListView() {
-    final pendientes = _ventas.where((v) => v.status.toString() == 'porCumplir').toList();
+    final pendientes = _ventas.where((v) => v.status.toString() == 'EstadoVenta.porCumplir').toList();
     if (pendientes.isEmpty) {
       return Center(child: Text('No hay ventas pendientes.'));
     }
