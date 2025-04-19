@@ -78,25 +78,60 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
+  // Lista de ventas sin calendario
   Widget _buildListView() {
-    final pendientes = _ventas.where((v) => v.status.toString() == 'EstadoVenta.porCumplir').toList();
+    final pendientes = _ventas
+        .where((v) => v.status.toString() == 'EstadoVenta.porCumplir')
+        .toList();
+    String statusText = '';
+    Color? textColor;
     if (pendientes.isEmpty) {
       return Center(child: Text('No hay ventas pendientes.'));
     }
+
     return ListView.builder(
       itemCount: pendientes.length,
       itemBuilder: (context, index) {
         final venta = pendientes[index];
+        switch (venta.status.toString()) {
+          case 'EstadoVenta.porCumplir':
+            statusText = 'Por Cumplir';
+            textColor = Colors.grey;
+            break;
+          case 'EstadoVenta.completado':
+            statusText = 'Completado';
+            textColor = Colors.green;
+            break;
+          case 'EstadoVenta.cancelado':
+            statusText = 'Cancelado';
+            textColor = Colors.red;
+            break;
+        }
         return ListTile(
-          title: Text('Venta #${venta.idVenta}'),
-          subtitle: Text(
-            'Cantidad: ${venta.cantidad} | Entrega: ${venta.fechaEntrega} | Producto ID: ${venta.idProducto}',
+          title: Text('Entrega #${venta.idVenta}'),
+          subtitle: RichText(
+            text: TextSpan(
+              style: DefaultTextStyle.of(context).style,
+              children: [
+                TextSpan(
+                  text:
+                      'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Estado: ',
+                ),
+                TextSpan(
+                  text: statusText,
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
           leading: CircleAvatar(
             backgroundColor: venta.status.toString() == 'EstadoVenta.porCumplir'
-                ? Colors.grey 
+                ? Colors.grey
                 : venta.status.toString() == 'EstadoVenta.completado'
-                    ? Colors.green 
+                    ? Colors.green
                     : Colors.red,
             radius: 10,
           ),
@@ -105,6 +140,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
+  // Lista de ventas con calendario
   Widget _buildCalendarView() {
     return Column(
       children: [
@@ -128,7 +164,6 @@ class _NegocioScreenState extends State<NegocioScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: events.map((event) {
                     final venta = event as VentaModel;
-                    
                     Color color;
                     switch (venta.status.toString()) {
                       case 'EstadoVenta.completado':
@@ -167,22 +202,55 @@ class _NegocioScreenState extends State<NegocioScreen> {
   Widget _buildEventosDiaSeleccionado() {
     final eventos = _getEventosParaDia(_selectedDay!);
     if (eventos.isEmpty) {
-      return Center(child: Text('No hay ventas para este día.'));
+      return Center(child: Text('No hay entregas para este día.'));
     }
     return ListView.builder(
       itemCount: eventos.length,
       itemBuilder: (context, index) {
         final venta = eventos[index];
+        String statusText = '';
+        Color? textColor;
+
+        switch (venta.status.toString()) {
+          case 'EstadoVenta.porCumplir':
+            statusText = 'Por Cumplir';
+            textColor = Colors.grey;
+            break;
+          case 'EstadoVenta.completado':
+            statusText = 'Completado';
+            textColor = Colors.green;
+            break;
+          case 'EstadoVenta.cancelado':
+            statusText = 'Cancelado';
+            textColor = Colors.red;
+            break;
+        }
+
         return ListTile(
           title: Text('Entrega #${venta.idVenta}'),
-          subtitle: Text(
-            'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Producto ID: ${venta.idProducto}',
+          subtitle: RichText(
+            text: TextSpan(
+              style: DefaultTextStyle.of(context).style,
+              children: [
+                TextSpan(
+                  text:
+                      'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Estado: ',
+                ),
+                TextSpan(
+                  text: statusText,
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
           leading: CircleAvatar(
             backgroundColor: venta.status.toString() == 'EstadoVenta.porCumplir'
-                ? Colors.grey 
+                ? Colors.grey
                 : venta.status.toString() == 'EstadoVenta.completado'
-                    ? Colors.green 
+                    ? Colors.green
                     : Colors.red,
             radius: 10,
           ),
@@ -232,7 +300,8 @@ class _NegocioScreenState extends State<NegocioScreen> {
                         if (picked != null) {
                           setDialogState(() {
                             _selectedFechaVenta = picked;
-                            if (_selectedFechaEntrega.isBefore(_selectedFechaVenta)) {
+                            if (_selectedFechaEntrega
+                                .isBefore(_selectedFechaVenta)) {
                               _selectedFechaEntrega =
                                   _selectedFechaVenta.add(Duration(days: 1));
                             }
@@ -273,8 +342,10 @@ class _NegocioScreenState extends State<NegocioScreen> {
                       final nuevaVenta = {
                         'idProducto': int.parse(_idProductoController.text),
                         'cantidad': int.parse(_cantidadController.text),
-                        'fecha_venta': DateFormat('yyyy-MM-dd').format(_selectedFechaVenta),
-                        'fecha_entrega': DateFormat('yyyy-MM-dd').format(_selectedFechaEntrega),
+                        'fecha_venta': DateFormat('yyyy-MM-dd')
+                            .format(_selectedFechaVenta),
+                        'fecha_entrega': DateFormat('yyyy-MM-dd')
+                            .format(_selectedFechaEntrega),
                         'status': 'porCumplir',
                       };
 
