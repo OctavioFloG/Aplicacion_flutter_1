@@ -16,12 +16,20 @@ class NegocioDataba {
       path,
       version: VERSIONDB,
       onCreate: (db, version) async{
+        await db.execute('''CREATE TABLE categoria (
+          idCategoria INTEGER PRIMARY KEY,
+          nombre VARCHAR(50) NOT NULL
+        )''');
+
         await db.execute('''CREATE TABLE producto (
           idProducto INTEGER PRIMARY KEY,
           nombre VARCHAR(100),
           precio REAL,
-          stock INTEGER
+          stock INTEGER,
+          idCategoria INTEGER,
+          FOREIGN KEY (idCategoria) REFERENCES categoria(idCategoria)
         )''');
+
         await db.execute('''CREATE TABLE venta (
           idVenta INTEGER PRIMARY KEY,
           idProducto INTEGER,
@@ -31,7 +39,7 @@ class NegocioDataba {
           status char(1),
           FOREIGN KEY (idProducto) REFERENCES producto(idProducto)
         )''');
-      await _insertarDatosPrueba(db);
+        await _insertarDatosPrueba(db);
       },
     );
   }
@@ -43,12 +51,23 @@ class NegocioDataba {
     String formatDate(DateTime date) {
       return "${date.year}-${date.month.toString().padLeft(2,'0')}-${date.day.toString().padLeft(2,'0')}";
     }
+
+    // Insertar categorías
     await db.rawInsert('''
-      INSERT INTO producto (nombre, precio, stock) VALUES 
-      ('Servicio de Limpieza', 50.0, 10),
-      ('Servicio de Jardinería', 75.0, 5),
-      ('Servicio de Reparación', 100.0, 3)
+      INSERT INTO categoria (nombre) VALUES 
+      ('Categoria1'),
+      ('Categoria2'),
+      ('Categoria3')
     ''');
+
+    // Modificar la inserción de productos para incluir categoría
+    await db.rawInsert('''
+      INSERT INTO producto (nombre, precio, stock, idCategoria) VALUES 
+      ('Producto1', 50.0, 10, 1),
+      ('Producto2', 75.0, 5, 2),
+      ('Producto3', 100.0, 3, 3)
+    ''');
+
     await db.rawInsert('''
       INSERT INTO venta (idProducto, cantidad, fecha_venta, fecha_entrega, status) VALUES 
       (1, 2, '${formatDate(DateTime.now())}', '${formatDate(DateTime.now().add(Duration(days: 2)))}', 'porCumplir'),
@@ -101,4 +120,32 @@ class NegocioDataba {
   //   Database? db = await database;
   //   return await db!.delete('producto', where: 'idProducto = ?', whereArgs: [id]);
   // } 
+
+  // CRUD de categoría
+
+  Future<List<Map<String, dynamic>>> getAllCategorias() async {
+    Database? db = await database;
+    return await db!.query('categoria');
+  }
+
+  Future<int> insertCategoria(Map<String, dynamic> row) async {
+    Database? db = await database;
+    return await db!.insert('categoria', row);
+  }
+
+  Future<int> updateCategoria(Map<String, dynamic> row) async {
+    Database? db = await database;
+    return await db!.update('categoria', row, 
+      where: 'idCategoria = ?', 
+      whereArgs: [row['idCategoria']]
+    );
+  }
+
+  Future<int> deleteCategoria(int id) async {
+    Database? db = await database;
+    return await db!.delete('categoria', 
+      where: 'idCategoria = ?', 
+      whereArgs: [id]
+    );
+  }
 }

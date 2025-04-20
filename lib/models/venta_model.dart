@@ -5,20 +5,20 @@ enum EstadoVenta {
 }
 
 class VentaModel {
-  int idVenta;
-  int idProducto;
-  int cantidad;
-  String fechaVenta;
-  String fechaEntrega;
-  EstadoVenta status;
+  int? idVenta;
+  int? idProducto;
+  int? cantidad;
+  String? fechaVenta;
+  String? fechaEntrega;
+  EstadoVenta? status;
   
   VentaModel({
-    required this.idVenta,
-    required this.idProducto,
-    required this.cantidad,
-    required this.fechaVenta,
-    required this.fechaEntrega,
-    required this.status,
+    this.idVenta,
+    this.idProducto,
+    this.cantidad,
+    this.fechaVenta,
+    this.fechaEntrega,
+    this.status,
   });
 
   factory VentaModel.fromMap(Map<String, dynamic> map) {

@@ -41,7 +41,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
     setState(() {
       _eventos = {};
       for (var venta in _ventas) {
-        final date = DateTime.parse(venta.fechaEntrega);
+        final date = DateTime.parse(venta.fechaEntrega!);
         final fechaKey = DateTime(date.year, date.month, date.day);
         _eventos[fechaKey] = _eventos[fechaKey] ?? [];
         _eventos[fechaKey]!.add(venta);
