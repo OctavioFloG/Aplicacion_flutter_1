@@ -87,60 +87,54 @@ class _NegocioScreenState extends State<NegocioScreen> {
 
   // Lista de ventas con calendario
   Widget _buildCalendarView() {
-    return Column(
-      children: [
-        TableCalendar(
-          firstDay: DateTime.utc(2020, 1, 1),
-          lastDay: DateTime.utc(2030, 12, 31),
-          focusedDay: _focusedDay,
-          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-          onDaySelected: (selectedDay, focusedDay) {
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay = focusedDay;
-            });
-          },
-          calendarFormat: CalendarFormat.month,
-          eventLoader: _getEventosParaDia,
-          calendarBuilders: CalendarBuilders(
-            markerBuilder: (context, day, events) {
-              if (events.isNotEmpty) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: events.map((event) {
-                    final venta = event as VentaModel;
-                    Color color;
-                    switch (venta.status.toString()) {
-                      case 'EstadoVenta.completado':
-                        color = Colors.green;
-                        break;
-                      case 'EstadoVenta.cancelado':
-                        color = Colors.red;
-                        break;
-                      default:
-                        color = Colors.grey;
-                        break;
-                    }
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 1.0),
-                      width: 6.0,
-                      height: 6.0,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                      ),
-                    );
-                  }).toList(),
+    return TableCalendar(
+      firstDay: DateTime.utc(2020, 1, 1),
+      lastDay: DateTime.utc(2030, 12, 31),
+      focusedDay: _focusedDay,
+      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _selectedDay = selectedDay;
+          _focusedDay = focusedDay;
+        });
+        _mostrarEventosDelDia(context, selectedDay);
+      },
+      calendarFormat: CalendarFormat.month,
+      eventLoader: _getEventosParaDia,
+      calendarBuilders: CalendarBuilders(
+        markerBuilder: (context, day, events) {
+          if (events.isNotEmpty) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: events.map((event) {
+                final venta = event as VentaModel;
+                Color color;
+                switch (venta.status.toString()) {
+                  case 'EstadoVenta.completado':
+                    color = Colors.green;
+                    break;
+                  case 'EstadoVenta.cancelado':
+                    color = Colors.red;
+                    break;
+                  default:
+                    color = Colors.grey;
+                    break;
+                }
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 1.0),
+                  width: 6.0,
+                  height: 6.0,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
                 );
-              }
-              return null;
-            },
-          ),
-        ),
-        Expanded(
-          child: _buildEventos(),
-        ),
-      ],
+              }).toList(),
+            );
+          }
+          return null;
+        },
+      ),
     );
   }
 
@@ -228,6 +222,26 @@ class _NegocioScreenState extends State<NegocioScreen> {
           onTap: () => _mostrarDetalleVenta(context, venta),
         );
       },
+    );
+  }
+
+  void _mostrarEventosDelDia(BuildContext context, DateTime dia) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Entregas del ${DateFormat('dd/MM/yyyy').format(dia)}'),
+        content: Container(
+          width: double.maxFinite,
+          height: 300, // Altura fija para el modal
+          child: _buildEventos(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cerrar'),
+          ),
+        ],
+      ),
     );
   }
 
