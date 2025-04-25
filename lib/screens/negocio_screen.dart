@@ -65,6 +65,10 @@ class _NegocioScreenState extends State<NegocioScreen> {
             onPressed: () {
               setState(() {
                 _showCalendar = !_showCalendar;
+                // Si cambiamos a la vista de lista, reiniciamos la selección
+                if (!_showCalendar) {
+                  _selectedDay = null;
+                }
               });
             },
           ),
@@ -80,64 +84,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
 
   // Lista de ventas sin calendario
   Widget _buildListView() {
-    final pendientes = _ventas
-        .where((v) => v.status.toString() == 'EstadoVenta.porCumplir')
-        .toList();
-    String statusText = '';
-    Color? textColor;
-    if (pendientes.isEmpty) {
-      return Center(child: Text('No hay ventas pendientes.'));
-    }
-
-    return ListView.builder(
-      itemCount: pendientes.length,
-      itemBuilder: (context, index) {
-        final venta = pendientes[index];
-        switch (venta.status.toString()) {
-          case 'EstadoVenta.porCumplir':
-            statusText = 'Por Cumplir';
-            textColor = Colors.grey;
-            break;
-          case 'EstadoVenta.completado':
-            statusText = 'Completado';
-            textColor = Colors.green;
-            break;
-          case 'EstadoVenta.cancelado':
-            statusText = 'Cancelado';
-            textColor = Colors.red;
-            break;
-        }
-        return ListTile(
-          title: Text('Entrega #${venta.idVenta}'),
-          subtitle: RichText(
-            text: TextSpan(
-              style: DefaultTextStyle.of(context).style,
-              children: [
-                TextSpan(
-                  text:
-                      'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Estado: ',
-                ),
-                TextSpan(
-                  text: statusText,
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          leading: CircleAvatar(
-            backgroundColor: venta.status.toString() == 'EstadoVenta.porCumplir'
-                ? Colors.grey
-                : venta.status.toString() == 'EstadoVenta.completado'
-                    ? Colors.green
-                    : Colors.red,
-            radius: 10,
-          ),
-        );
-      },
-    );
+    return _buildEventos();
   }
 
   // Lista de ventas con calendario
@@ -193,24 +140,36 @@ class _NegocioScreenState extends State<NegocioScreen> {
           ),
         ),
         Expanded(
-          child: _buildEventosDiaSeleccionado(),
+          child: _buildEventos(),
         ),
       ],
     );
   }
 
-  Widget _buildEventosDiaSeleccionado() {
-    final eventos = _getEventosParaDia(_selectedDay!);
-    if (eventos.isEmpty) {
-      return Center(child: Text('No hay entregas para este día.'));
+  Widget _buildEventos() {
+    List<VentaModel> eventos;
+    if (_showCalendar && _selectedDay != null) {
+      eventos = _getEventosParaDia(_selectedDay!);
+      if (eventos.isEmpty) {
+        return Center(child: Text('No hay entregas para este día.'));
+      }
+    } else if (!_showCalendar) {
+      eventos = _ventas
+          .where((v) => v.status.toString() == 'EstadoVenta.porCumplir')
+          .toList();
+      if (eventos.isEmpty) {
+        return Center(child: Text('No hay entregas pendientes.'));
+      }
+    } else {
+      return Center(child: Text('Selecciona un día para ver las entregas.'));
     }
+
     return ListView.builder(
       itemCount: eventos.length,
       itemBuilder: (context, index) {
         final venta = eventos[index];
         String statusText = '';
         Color? textColor;
-
         switch (venta.status.toString()) {
           case 'EstadoVenta.porCumplir':
             statusText = 'Por Cumplir';
@@ -225,7 +184,6 @@ class _NegocioScreenState extends State<NegocioScreen> {
             textColor = Colors.red;
             break;
         }
-
         return ListTile(
           title: Text('Entrega #${venta.idVenta}'),
           subtitle: RichText(

@@ -101,25 +101,25 @@ class NegocioDataba {
 
   // CRUD de producto
 
-  // Future<List<Map<String, dynamic>>> getAllProductos() async {
-  //   Database? db = await database;
-  //   return await db!.query('producto');
-  // }
+  Future<List<Map<String, dynamic>>> getAllProductos() async {
+    Database? db = await database;
+    return await db!.query('producto');
+  }
 
-  // Future<int> insertProducto(Map<String, dynamic> row) async {
-  //   Database? db = await database;
-  //   return await db!.insert('producto', row);
-  // }
+  Future<int> insertProducto(Map<String, dynamic> row) async {
+    Database? db = await database;
+    return await db!.insert('producto', row);
+  }
 
-  // Future<int> updateProducto(Map<String, dynamic> row) async {
-  //   Database? db = await database;
-  //   return await db!.update('producto', row, where: 'idProducto = ?', whereArgs: [row['idProducto']]);
-  // }
+  Future<int> updateProducto(Map<String, dynamic> row) async {
+    Database? db = await database;
+    return await db!.update('producto', row, where: 'idProducto = ?', whereArgs: [row['idProducto']]);
+  }
 
-  // Future<int> deleteProducto(int id) async {
-  //   Database? db = await database;
-  //   return await db!.delete('producto', where: 'idProducto = ?', whereArgs: [id]);
-  // } 
+  Future<int> deleteProducto(int id) async {
+    Database? db = await database;
+    return await db!.delete('producto', where: 'idProducto = ?', whereArgs: [id]);
+  } 
 
   // CRUD de categoría
 
