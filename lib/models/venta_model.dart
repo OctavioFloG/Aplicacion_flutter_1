@@ -10,16 +10,30 @@ class VentaModel {
   int? cantidad;
   String? fechaVenta;
   String? fechaEntrega;
-  EstadoVenta? status;
-  
+  EstadoVenta status = EstadoVenta.porCumplir; // Inicializar con valor por defecto
+
   VentaModel({
     this.idVenta,
     this.idProducto,
     this.cantidad,
     this.fechaVenta,
     this.fechaEntrega,
-    this.status,
-  });
+    EstadoVenta? status,
+  }) : this.status = status ?? EstadoVenta.porCumplir;
+
+  // Método helper para convertir string a enum
+  static EstadoVenta stringToEstado(String estado) {
+    switch (estado) {
+      case 'porCumplir':
+        return EstadoVenta.porCumplir;
+      case 'completado':
+        return EstadoVenta.completado;
+      case 'cancelado':
+        return EstadoVenta.cancelado;
+      default:
+        return EstadoVenta.porCumplir;
+    }
+  }
 
   factory VentaModel.fromMap(Map<String, dynamic> map) {
     return VentaModel(
@@ -28,10 +42,7 @@ class VentaModel {
       cantidad: map['cantidad'],
       fechaVenta: map['fecha_venta'],
       fechaEntrega: map['fecha_entrega'],
-      status: EstadoVenta.values.firstWhere(
-        (e) => e.toString().split('.').last == map['status'],
-        orElse: () => EstadoVenta.porCumplir
-      ),
+      status: stringToEstado(map['status']),
     );
   }
 

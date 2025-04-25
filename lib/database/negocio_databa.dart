@@ -36,7 +36,7 @@ class NegocioDataba {
           cantidad INTEGER,
           fecha_venta DATE,
           fecha_entrega DATE,
-          status char(1),
+          status VARCHAR(20),
           FOREIGN KEY (idProducto) REFERENCES producto(idProducto)
         )''');
         await _insertarDatosPrueba(db);
@@ -72,8 +72,7 @@ class NegocioDataba {
       INSERT INTO venta (idProducto, cantidad, fecha_venta, fecha_entrega, status) VALUES 
       (1, 2, '${formatDate(DateTime.now())}', '${formatDate(DateTime.now().add(Duration(days: 2)))}', 'porCumplir'),
       (2, 1, '${formatDate(DateTime.now())}', '${formatDate(DateTime.now().add(Duration(days: 1)))}', 'cancelado'),
-      (3, 3, '${formatDate(DateTime.now().subtract(Duration(days: 1)))}', '${formatDate(DateTime.now().add(Duration(days: 3)))}', 'completado'),
-      (1, 1, '${formatDate(DateTime.now().add(Duration(days: 1)))}', '${formatDate(DateTime.now().add(Duration(days: 5)))}', 'porCumplir')
+      (3, 3, '${formatDate(DateTime.now().subtract(Duration(days: 1)))}', '${formatDate(DateTime.now().add(Duration(days: 3)))}', 'completado')
     ''');
   }
 

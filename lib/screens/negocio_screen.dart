@@ -12,8 +12,6 @@ class NegocioScreen extends StatefulWidget {
   _NegocioScreenState createState() => _NegocioScreenState();
 }
 
-enum EstadoVenta { porCumplir, completado, cancelado }
-
 class _NegocioScreenState extends State<NegocioScreen> {
   final NegocioDataba _db = NegocioDataba();
   bool _showCalendar = false;
@@ -154,9 +152,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
         return Center(child: Text('No hay entregas para este día.'));
       }
     } else if (!_showCalendar) {
-      eventos = _ventas
-          .where((v) => v.status.toString() == 'EstadoVenta.porCumplir')
-          .toList();
+      eventos = _ventas.where((v) => v.status == EstadoVenta.porCumplir).toList();
       if (eventos.isEmpty) {
         return Center(child: Text('No hay entregas pendientes.'));
       }
@@ -168,18 +164,23 @@ class _NegocioScreenState extends State<NegocioScreen> {
       itemCount: eventos.length,
       itemBuilder: (context, index) {
         final venta = eventos[index];
+        print(venta.status.toString());
         String statusText = '';
         Color? textColor;
-        switch (venta.status.toString()) {
-          case 'EstadoVenta.porCumplir':
+        switch (venta.status) {
+          case EstadoVenta.porCumplir:
             statusText = 'Por Cumplir';
             textColor = Colors.grey;
             break;
-          case 'EstadoVenta.completado':
+          case EstadoVenta.completado:
             statusText = 'Completado';
             textColor = Colors.green;
             break;
-          case 'EstadoVenta.cancelado':
+          case EstadoVenta.cancelado:
+            statusText = 'Cancelado';
+            textColor = Colors.red;
+            break;
+          case EstadoVenta.cancelado:
             statusText = 'Cancelado';
             textColor = Colors.red;
             break;
@@ -191,8 +192,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
               style: DefaultTextStyle.of(context).style,
               children: [
                 TextSpan(
-                  text:
-                      'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Estado: ',
+                  text: 'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Estado: ',
                 ),
                 TextSpan(
                   text: statusText,
@@ -205,13 +205,174 @@ class _NegocioScreenState extends State<NegocioScreen> {
             ),
           ),
           leading: CircleAvatar(
-            backgroundColor: venta.status.toString() == 'EstadoVenta.porCumplir'
+            backgroundColor: venta.status == EstadoVenta.porCumplir
                 ? Colors.grey
-                : venta.status.toString() == 'EstadoVenta.completado'
+                : venta.status == EstadoVenta.completado
                     ? Colors.green
                     : Colors.red,
             radius: 10,
           ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.edit, color: Colors.blue),
+                onPressed: () => _mostrarFormularioEdicion(context, venta),
+              ),
+              IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _confirmarEliminacion(context, venta),
+              ),
+            ],
+          ),
+          onTap: () => _mostrarDetalleVenta(context, venta),
+        );
+      },
+    );
+  }
+
+  // Método para mostrar el detalle de la venta
+  void _mostrarDetalleVenta(BuildContext context, VentaModel venta) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Detalle de Entrega #${venta.idVenta}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Producto ID: ${venta.idProducto}'),
+            Text('Cantidad: ${venta.cantidad}'),
+            Text('Fecha de Venta: ${venta.fechaVenta}'),
+            Text('Fecha de Entrega: ${venta.fechaEntrega}'),
+            RichText(
+              text: TextSpan(
+                style: DefaultTextStyle.of(context).style,
+                children: [
+                  TextSpan(text: 'Estado: '),
+                  TextSpan(
+                    text: venta.status.toString().split('.').last,
+                    style: TextStyle(
+                      color: venta.status.toString() == 'EstadoVenta.porCumplir'
+                          ? Colors.grey
+                          : venta.status.toString() == 'EstadoVenta.completado'
+                              ? Colors.green
+                              : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Método para confirmar eliminación
+  void _confirmarEliminacion(BuildContext context, VentaModel venta) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Confirmar Eliminación'),
+        content: Text('¿Estás seguro de eliminar esta entrega?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _db.deleteVenta(venta.idVenta!);
+              await _cargarDatos();
+              Navigator.pop(context);
+            },
+            child: Text('Eliminar', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Método para mostrar formulario de edición
+  void _mostrarFormularioEdicion(BuildContext context, VentaModel venta) {
+    final _cantidadController =
+        TextEditingController(text: venta.cantidad.toString());
+    final _idProductoController =
+        TextEditingController(text: venta.idProducto.toString());
+    DateTime _selectedFechaVenta = DateTime.parse(venta.fechaVenta!);
+    DateTime _selectedFechaEntrega = DateTime.parse(venta.fechaEntrega!);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Editar Entrega #${venta.idVenta}'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // ... Copiar los campos del formulario de creación ...
+                    // Agregar selector de estado
+                    DropdownButtonFormField<EstadoVenta>(
+                      value: venta.status,
+                      items: EstadoVenta.values.map((estado) {
+                        return DropdownMenuItem<EstadoVenta>(
+                          value: estado,
+                          child: Text(estado.toString().split('.').last),
+                        );
+                      }).toList(),
+                      onChanged: (EstadoVenta? newValue) {
+                        if (newValue != null) {
+                          setDialogState(() {
+                            venta.status = newValue;
+                          });
+                        }
+                      },
+                      decoration: InputDecoration(labelText: 'Estado'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (_cantidadController.text.isNotEmpty &&
+                        _idProductoController.text.isNotEmpty) {
+                      final ventaActualizada = {
+                        'idVenta': venta.idVenta,
+                        'idProducto': int.parse(_idProductoController.text),
+                        'cantidad': int.parse(_cantidadController.text),
+                        'fecha_venta': DateFormat('yyyy-MM-dd')
+                            .format(_selectedFechaVenta),
+                        'fecha_entrega': DateFormat('yyyy-MM-dd')
+                            .format(_selectedFechaEntrega),
+                        'status': venta.status.toString().split('.').last,
+                      };
+
+                      await _db.updateVenta(ventaActualizada);
+                      await _cargarDatos();
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text('Guardar'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
