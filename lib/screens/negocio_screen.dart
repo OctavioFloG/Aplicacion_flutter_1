@@ -111,13 +111,13 @@ class _NegocioScreenState extends State<NegocioScreen> {
                 Color color;
                 switch (venta.status.toString()) {
                   case 'EstadoVenta.completado':
-                    color = Colors.green;
+                    color = Colors.grey;
                     break;
                   case 'EstadoVenta.cancelado':
                     color = Colors.red;
                     break;
                   default:
-                    color = Colors.grey;
+                    color = Colors.green;
                     break;
                 }
                 return Container(
@@ -164,15 +164,11 @@ class _NegocioScreenState extends State<NegocioScreen> {
         switch (venta.status) {
           case EstadoVenta.porCumplir:
             statusText = 'Por Cumplir';
-            textColor = Colors.grey;
+            textColor = Colors.green;
             break;
           case EstadoVenta.completado:
             statusText = 'Completado';
-            textColor = Colors.green;
-            break;
-          case EstadoVenta.cancelado:
-            statusText = 'Cancelado';
-            textColor = Colors.red;
+            textColor = Colors.grey;
             break;
           case EstadoVenta.cancelado:
             statusText = 'Cancelado';
@@ -200,9 +196,9 @@ class _NegocioScreenState extends State<NegocioScreen> {
           ),
           leading: CircleAvatar(
             backgroundColor: venta.status == EstadoVenta.porCumplir
-                ? Colors.grey
+                ? Colors.green
                 : venta.status == EstadoVenta.completado
-                    ? Colors.green
+                    ? Colors.grey
                     : Colors.red,
             radius: 10,
           ),
@@ -268,9 +264,9 @@ class _NegocioScreenState extends State<NegocioScreen> {
                     text: venta.status.toString().split('.').last,
                     style: TextStyle(
                       color: venta.status.toString() == 'EstadoVenta.porCumplir'
-                          ? Colors.grey
+                          ? Colors.green
                           : venta.status.toString() == 'EstadoVenta.completado'
-                              ? Colors.green
+                              ? Colors.grey
                               : Colors.red,
                       fontWeight: FontWeight.bold,
                     ),
