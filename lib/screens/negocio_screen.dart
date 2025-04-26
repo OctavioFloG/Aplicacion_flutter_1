@@ -19,6 +19,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
   Map<DateTime, List<VentaModel>> _eventos = {};
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  EstadoVenta? _selectedStatus;
 
   @override
   void initState() {
@@ -28,7 +29,10 @@ class _NegocioScreenState extends State<NegocioScreen> {
   }
 
   Future<void> _cargarDatos() async {
-    final datos = await _db.getAllVentas();
+    final datos = _selectedStatus == null 
+        ? await _db.getAllVentas()  // Si es null, obtener todas las ventas
+        : await _db.getVentasByStatus(_selectedStatus.toString().split('.').last);
+        
     setState(() {
       _ventas = datos.map((dato) => VentaModel.fromMap(dato)).toList();
       _cargarEventos();
@@ -55,37 +59,16 @@ class _NegocioScreenState extends State<NegocioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Ventas y Servicios'),
-        actions: [
-          IconButton(
-            icon: Icon(_showCalendar ? Icons.list : Icons.calendar_today),
-            onPressed: () {
-              setState(() {
-                _showCalendar = !_showCalendar;
-                // Si cambiamos a la vista de lista, reiniciamos la selección
-                if (!_showCalendar) {
-                  _selectedDay = null;
-                }
-              });
-            },
-          ),
-        ],
-      ),
-      body: _showCalendar ? _buildCalendarView() : _buildListView(),
+      appBar: _buildAppBar(),
+      body: _showCalendar ? _buildCalendarView() : _buildEventos(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _mostrarFormulario(context),
+        onPressed: () => _mostrarFormularioAdd(context),
         child: Icon(Icons.add),
       ),
     );
   }
 
-  // Lista de ventas sin calendario
-  Widget _buildListView() {
-    return _buildEventos();
-  }
-
-  // Lista de ventas con calendario
+  // Opcion de calendario
   Widget _buildCalendarView() {
     return TableCalendar(
       firstDay: DateTime.utc(2020, 1, 1),
@@ -138,6 +121,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
+  // Lista de ventas
   Widget _buildEventos() {
     List<VentaModel> eventos;
     if (_showCalendar && _selectedDay != null) {
@@ -146,7 +130,8 @@ class _NegocioScreenState extends State<NegocioScreen> {
         return Center(child: Text('No hay entregas para este día.'));
       }
     } else if (!_showCalendar) {
-      eventos = _ventas.where((v) => v.status == EstadoVenta.porCumplir).toList();
+      eventos =
+          _ventas.where((v) => v.status == EstadoVenta.porCumplir).toList();
       if (eventos.isEmpty) {
         return Center(child: Text('No hay entregas pendientes.'));
       }
@@ -182,7 +167,8 @@ class _NegocioScreenState extends State<NegocioScreen> {
               style: DefaultTextStyle.of(context).style,
               children: [
                 TextSpan(
-                  text: 'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Estado: ',
+                  text:
+                      'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Estado: ',
                 ),
                 TextSpan(
                   text: statusText,
@@ -226,7 +212,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Entregas del ${DateFormat('dd/MM/yyyy').format(dia)}'),
-        content: Container(
+        content: SizedBox(
           width: double.maxFinite,
           height: 300, // Altura fija para el modal
           child: _buildEventos(),
@@ -241,7 +227,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
-  // Método para mostrar el detalle de la venta
+  // Modal de la venta
   void _mostrarDetalleVenta(BuildContext context, VentaModel venta) {
     showDialog(
       context: context,
@@ -286,7 +272,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
-  // Método para confirmar eliminación
+  // Modal de confirmación de eliminación de una venta
   void _confirmarEliminacion(BuildContext context, VentaModel venta) {
     showDialog(
       context: context,
@@ -311,7 +297,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
-  // Método para mostrar formulario de edición
+  // Modal para editar una venta
   void _mostrarFormularioEdicion(BuildContext context, VentaModel venta) {
     final _cantidadController =
         TextEditingController(text: venta.cantidad.toString());
@@ -388,7 +374,8 @@ class _NegocioScreenState extends State<NegocioScreen> {
     );
   }
 
-  void _mostrarFormulario(BuildContext context) {
+  // Modal para crear una nueva venta
+  void _mostrarFormularioAdd(BuildContext context) {
     final _cantidadController = TextEditingController();
     final _idProductoController = TextEditingController();
     DateTime _selectedFechaVenta = DateTime.now();
@@ -490,6 +477,66 @@ class _NegocioScreenState extends State<NegocioScreen> {
           },
         );
       },
+    );
+  }
+
+  // Modificar AppBar para incluir filtro por status
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: Text('Ventas y Servicios'),
+      actions: [
+        DropdownButton<EstadoVenta?>(  // Cambiamos a nullable
+          value: _selectedStatus,
+          dropdownColor: Theme.of(context).primaryColor,
+          style: TextStyle(color: Colors.white),
+          underline: Container(), //Para eliminar la linea del dropdown
+          hint: Row(  // Mostramos cuando no hay selección
+            children: [
+              Icon(Icons.filter_list, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Todos', style: TextStyle(color: Colors.white)),
+            ],
+          ),
+          items: [
+            DropdownMenuItem<EstadoVenta?>(
+              value: null,  // null representa "Todos"
+              child: Row(
+                children: [
+                  Icon(Icons.filter_list, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Todos', style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+            ...EstadoVenta.values.map((estado) {
+              return DropdownMenuItem(
+                value: estado,
+                child: Text(
+                  estado.toString().split('.').last,
+                  style: TextStyle(color: Colors.white),
+                ),
+              );
+            }).toList(),
+          ],
+          onChanged: (EstadoVenta? newValue) {
+            setState(() {
+              _selectedStatus = newValue;
+              _cargarDatos();
+            });
+          },
+        ),
+        IconButton(
+          icon: Icon(_showCalendar ? Icons.list : Icons.calendar_today),
+          onPressed: () {
+            setState(() {
+              _showCalendar = !_showCalendar;
+              if (!_showCalendar) {
+                _selectedDay = null;
+              }
+            });
+          },
+        ),
+      ],
     );
   }
 }

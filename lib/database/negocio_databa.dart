@@ -98,6 +98,16 @@ class NegocioDataba {
     return await db!.delete('venta', where: 'idVenta = ?', whereArgs: [id]);
   }
 
+  Future<List<Map<String, dynamic>>> getVentasByStatus(String status) async {
+    Database? db = await database;
+    return await db!.query(
+      'venta',
+      where: 'status = ?',
+      whereArgs: [status],
+      orderBy: 'fecha_entrega ASC',
+    );
+  }
+
   // CRUD de producto
 
   Future<List<Map<String, dynamic>>> getAllProductos() async {
