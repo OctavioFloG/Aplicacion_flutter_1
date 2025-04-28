@@ -1,7 +1,7 @@
 class ProductoModel {
   int? idProducto;
   String? nombre;
-  int? precio;
+  double? precio;
   int? stock;
   int? idCategoria;
 

@@ -1,6 +1,8 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/categoria_model.dart';
+import 'package:flutter_application_1/models/producto_model.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/database/negocio_databa.dart';
@@ -29,10 +31,11 @@ class _NegocioScreenState extends State<NegocioScreen> {
   }
 
   Future<void> _cargarDatos() async {
-    final datos = _selectedStatus == null 
-        ? await _db.getAllVentas()  // Si es null, obtener todas las ventas
-        : await _db.getVentasByStatus(_selectedStatus.toString().split('.').last);
-        
+    final datos = _selectedStatus == null
+        ? await _db.getAllVentas() // Si es null, obtener todas las ventas
+        : await _db
+            .getVentasByStatus(_selectedStatus.toString().split('.').last);
+
     setState(() {
       _ventas = datos.map((dato) => VentaModel.fromMap(dato)).toList();
       _cargarEventos();
@@ -317,8 +320,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // ... Copiar los campos del formulario de creación ...
-                    // Agregar selector de estado
+                    // Selector de status
                     DropdownButtonFormField<EstadoVenta>(
                       value: venta.status,
                       items: EstadoVenta.values.map((estado) {
@@ -377,9 +379,22 @@ class _NegocioScreenState extends State<NegocioScreen> {
   // Modal para crear una nueva venta
   void _mostrarFormularioAdd(BuildContext context) {
     final _cantidadController = TextEditingController();
-    final _idProductoController = TextEditingController();
     DateTime _selectedFechaVenta = DateTime.now();
     DateTime _selectedFechaEntrega = DateTime.now().add(Duration(days: 1));
+    int? _selectedCategoriaId;
+    int? _selectedProductoId;
+    List<CategoriaModel> _categorias = [];
+    List<ProductoModel> _productos = [];
+
+    Future<void> _cargarCategorias() async {
+      final datos = await _db.getAllCategorias();
+      _categorias = datos.map((dato) => CategoriaModel.fromMap(dato)).toList();
+    }
+
+    Future<void> _cargarProductos(int categoriaId) async {
+      final datos = await _db.getProductosByCategoria(categoriaId);
+      _productos = datos.map((dato) => ProductoModel.fromMap(dato)).toList();
+    }
 
     showDialog(
       context: context,
@@ -392,16 +407,111 @@ class _NegocioScreenState extends State<NegocioScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(
-                      controller: _idProductoController,
-                      decoration: InputDecoration(labelText: 'ID Producto'),
-                      keyboardType: TextInputType.number,
+                    // Selector de Categoría
+                    FutureBuilder(
+                      future: _cargarCategorias(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+                        return DropdownButtonFormField<int>(
+                          value: _selectedCategoriaId,
+                          hint: Text('Seleccione una categoría'),
+                          items: _categorias.map((categoria) {
+                            return DropdownMenuItem(
+                              value: categoria.idCategoria,
+                              child: Text(categoria.nombre),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setDialogState(() {
+                              _selectedCategoriaId = value;
+                              _selectedProductoId = null;
+                              if (value != null) {
+                                _cargarProductos(value);
+                              }
+                            });
+                          },
+                        );
+                      },
                     ),
-                    TextField(
-                      controller: _cantidadController,
-                      decoration: InputDecoration(labelText: 'Cantidad'),
-                      keyboardType: TextInputType.number,
-                    ),
+                    SizedBox(height: 16),
+
+                    // Selector de Producto
+                    if (_selectedCategoriaId != null)
+                      FutureBuilder(
+                        future: _cargarProductos(_selectedCategoriaId!),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          }
+                          return DropdownButtonFormField<int>(
+                            value: _selectedProductoId,
+                            hint: Text('Seleccione un producto'),
+                            items: _productos.map((producto) {
+                              return DropdownMenuItem(
+                                value: producto.idProducto,
+                                child: Text(
+                                    '${producto.nombre} - \$${producto.precio}'),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                _selectedProductoId = value;
+                              });
+                            },
+                          );
+                        },
+                      ),
+
+                    if (_selectedProductoId != null) ...[
+                      SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Cantidad: '),
+                          IconButton(
+                            icon: Icon(Icons.remove_circle),
+                            color: Colors.red,
+                            onPressed: () {
+                              setDialogState(() {
+                                int cantidad = int.tryParse(_cantidadController.text) ?? 0;
+                                if (cantidad > 1) {
+                                  _cantidadController.text = (cantidad - 1).toString();
+                                }
+                              });
+                            },
+                          ),
+                          Container(
+                            width: 50,
+                            child: Text(
+                              _cantidadController.text.isEmpty ? '1' : _cantidadController.text,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.add_circle),
+                            color: Colors.green,
+                            onPressed: () {
+                              setDialogState(() {
+                                int cantidad = int.tryParse(_cantidadController.text) ?? 0;
+                                ProductoModel producto = _productos.firstWhere(
+                                  (p) => p.idProducto == _selectedProductoId
+                                );
+                                if (cantidad < (producto.stock ?? 0)) {
+                                  _cantidadController.text = (cantidad + 1).toString();
+                                }
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+
+                    // Selectores de fecha
                     ListTile(
                       title: Text(
                           'Fecha de Venta: ${DateFormat('dd/MM/yyyy').format(_selectedFechaVenta)}'),
@@ -416,11 +526,6 @@ class _NegocioScreenState extends State<NegocioScreen> {
                         if (picked != null) {
                           setDialogState(() {
                             _selectedFechaVenta = picked;
-                            if (_selectedFechaEntrega
-                                .isBefore(_selectedFechaVenta)) {
-                              _selectedFechaEntrega =
-                                  _selectedFechaVenta.add(Duration(days: 1));
-                            }
                           });
                         }
                       },
@@ -454,9 +559,9 @@ class _NegocioScreenState extends State<NegocioScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     if (_cantidadController.text.isNotEmpty &&
-                        _idProductoController.text.isNotEmpty) {
+                        _selectedProductoId != null) {
                       final nuevaVenta = {
-                        'idProducto': int.parse(_idProductoController.text),
+                        'idProducto': _selectedProductoId,
                         'cantidad': int.parse(_cantidadController.text),
                         'fecha_venta': DateFormat('yyyy-MM-dd')
                             .format(_selectedFechaVenta),
@@ -485,12 +590,14 @@ class _NegocioScreenState extends State<NegocioScreen> {
     return AppBar(
       title: Text('Ventas y Servicios'),
       actions: [
-        DropdownButton<EstadoVenta?>(  // Cambiamos a nullable
+        DropdownButton<EstadoVenta?>(
+          // Cambiamos a nullable
           value: _selectedStatus,
           dropdownColor: Theme.of(context).primaryColor,
           style: TextStyle(color: Colors.white),
           underline: Container(), //Para eliminar la linea del dropdown
-          hint: Row(  // Mostramos cuando no hay selección
+          hint: Row(
+            // Mostramos cuando no hay selección
             children: [
               Icon(Icons.filter_list, color: Colors.white),
               SizedBox(width: 8),
@@ -499,7 +606,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
           ),
           items: [
             DropdownMenuItem<EstadoVenta?>(
-              value: null,  // null representa "Todos"
+              value: null, // null representa "Todos"
               child: Row(
                 children: [
                   Icon(Icons.filter_list, color: Colors.white),

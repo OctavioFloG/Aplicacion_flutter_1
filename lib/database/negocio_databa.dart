@@ -157,4 +157,13 @@ class NegocioDataba {
       whereArgs: [id]
     );
   }
+
+  Future<List<Map<String, dynamic>>> getProductosByCategoria(int categoriaId) async {
+    Database? db = await database;
+    return await db!.query(
+      'producto',
+      where: 'idCategoria = ?',
+      whereArgs: [categoriaId],
+    );
+  }
 }
