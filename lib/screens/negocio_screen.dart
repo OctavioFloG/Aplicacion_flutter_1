@@ -142,72 +142,73 @@ class _NegocioScreenState extends State<NegocioScreen> {
       return Center(child: Text('Selecciona un día para ver las entregas.'));
     }
 
-    return ListView.builder(
-      itemCount: eventos.length,
-      itemBuilder: (context, index) {
-        final venta = eventos[index];
-        print(venta.status.toString());
-        String statusText = '';
-        Color? textColor;
-        switch (venta.status) {
-          case EstadoVenta.porCumplir:
-            statusText = 'Por Cumplir';
-            textColor = Colors.green;
-            break;
-          case EstadoVenta.completado:
-            statusText = 'Completado';
-            textColor = Colors.grey;
-            break;
-          case EstadoVenta.cancelado:
-            statusText = 'Cancelado';
-            textColor = Colors.red;
-            break;
-        }
-        return ListTile(
-          title: Text('Entrega #${venta.idVenta}'),
-          subtitle: RichText(
-            text: TextSpan(
-              style: DefaultTextStyle.of(context).style,
-              children: [
-                TextSpan(
-                  text:
-                      'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Estado: ',
-                ),
-                TextSpan(
-                  text: statusText,
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.bold,
+    return CustomScrollView(slivers: [
+      SliverList.builder(
+        itemCount: eventos.length,
+        itemBuilder: (context, index) {
+          final venta = eventos[index];
+          String statusText = '';
+          Color? textColor;
+          switch (venta.status) {
+            case EstadoVenta.porCumplir:
+              statusText = 'Por Cumplir';
+              textColor = Colors.green;
+              break;
+            case EstadoVenta.completado:
+              statusText = 'Completado';
+              textColor = Colors.grey;
+              break;
+            case EstadoVenta.cancelado:
+              statusText = 'Cancelado';
+              textColor = Colors.red;
+              break;
+          }
+          return ListTile(
+            title: Text('Entrega #${venta.idVenta}'),
+            subtitle: RichText(
+              text: TextSpan(
+                style: DefaultTextStyle.of(context).style,
+                children: [
+                  TextSpan(
+                    text:
+                        'Cantidad: ${venta.cantidad} | Venta: ${venta.fechaVenta} | Estado: ',
                   ),
+                  TextSpan(
+                    text: statusText,
+                    style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            leading: CircleAvatar(
+              backgroundColor: venta.status == EstadoVenta.porCumplir
+                  ? Colors.green
+                  : venta.status == EstadoVenta.completado
+                      ? Colors.grey
+                      : Colors.red,
+              radius: 10,
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit, color: Colors.blue),
+                  onPressed: () => _mostrarFormularioEdicion(context, venta),
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _confirmarEliminacion(context, venta),
                 ),
               ],
             ),
-          ),
-          leading: CircleAvatar(
-            backgroundColor: venta.status == EstadoVenta.porCumplir
-                ? Colors.green
-                : venta.status == EstadoVenta.completado
-                    ? Colors.grey
-                    : Colors.red,
-            radius: 10,
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(Icons.edit, color: Colors.blue),
-                onPressed: () => _mostrarFormularioEdicion(context, venta),
-              ),
-              IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _confirmarEliminacion(context, venta),
-              ),
-            ],
-          ),
-          onTap: () => _mostrarDetalleVenta(context, venta),
-        );
-      },
-    );
+            onTap: () => _mostrarDetalleVenta(context, venta),
+          );
+        },
+      ),
+    ]);
   }
 
   void _mostrarEventosDelDia(BuildContext context, DateTime dia) {
@@ -477,9 +478,11 @@ class _NegocioScreenState extends State<NegocioScreen> {
                             color: Colors.red,
                             onPressed: () {
                               setDialogState(() {
-                                int cantidad = int.tryParse(_cantidadController.text) ?? 0;
+                                int cantidad =
+                                    int.tryParse(_cantidadController.text) ?? 0;
                                 if (cantidad > 1) {
-                                  _cantidadController.text = (cantidad - 1).toString();
+                                  _cantidadController.text =
+                                      (cantidad - 1).toString();
                                 }
                               });
                             },
@@ -487,7 +490,9 @@ class _NegocioScreenState extends State<NegocioScreen> {
                           Container(
                             width: 50,
                             child: Text(
-                              _cantidadController.text.isEmpty ? '1' : _cantidadController.text,
+                              _cantidadController.text.isEmpty
+                                  ? '1'
+                                  : _cantidadController.text,
                               textAlign: TextAlign.center,
                               style: TextStyle(fontSize: 18),
                             ),
@@ -497,12 +502,13 @@ class _NegocioScreenState extends State<NegocioScreen> {
                             color: Colors.green,
                             onPressed: () {
                               setDialogState(() {
-                                int cantidad = int.tryParse(_cantidadController.text) ?? 0;
+                                int cantidad =
+                                    int.tryParse(_cantidadController.text) ?? 0;
                                 ProductoModel producto = _productos.firstWhere(
-                                  (p) => p.idProducto == _selectedProductoId
-                                );
+                                    (p) => p.idProducto == _selectedProductoId);
                                 if (cantidad < (producto.stock ?? 0)) {
-                                  _cantidadController.text = (cantidad + 1).toString();
+                                  _cantidadController.text =
+                                      (cantidad + 1).toString();
                                 }
                               });
                             },
