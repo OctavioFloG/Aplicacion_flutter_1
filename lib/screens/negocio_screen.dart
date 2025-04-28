@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/categoria_model.dart';
 import 'package:flutter_application_1/models/producto_model.dart';
+// import 'package:flutter_application_1/utils/notification_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/database/negocio_databa.dart';
@@ -321,7 +322,6 @@ class _NegocioScreenState extends State<NegocioScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Selector de status
                     DropdownButtonFormField<EstadoVenta>(
                       value: venta.status,
                       items: EstadoVenta.values.map((estado) {
@@ -380,6 +380,7 @@ class _NegocioScreenState extends State<NegocioScreen> {
   // Modal para crear una nueva venta
   void _mostrarFormularioAdd(BuildContext context) {
     final _cantidadController = TextEditingController();
+    _cantidadController.text = "1";
     DateTime _selectedFechaVenta = DateTime.now();
     DateTime _selectedFechaEntrega = DateTime.now().add(Duration(days: 1));
     int? _selectedCategoriaId;
@@ -638,6 +639,24 @@ class _NegocioScreenState extends State<NegocioScreen> {
             });
           },
         ),
+        // BOTON PARA PROBAR LA NOTIFICACION RÁPIDA
+        // IconButton(
+        //   icon: Icon(Icons.notification_add),
+        //   onPressed: () async {
+        //     final notificationService = NotificationService();
+        //     await notificationService.initialize();
+        //     await notificationService.testNotification();
+
+        //     // Mostrar un SnackBar para confirmar
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       SnackBar(
+        //         content: Text('Notificación programada para 1 minuto'),
+        //         duration: Duration(seconds: 2),
+        //         backgroundColor: Colors.green,
+        //       ),
+        //     );
+        //   },
+        // ),
         IconButton(
           icon: Icon(_showCalendar ? Icons.list : Icons.calendar_today),
           onPressed: () {

@@ -15,10 +15,12 @@ import 'package:flutter_application_1/screens/viajes_screen2.dart';
 import 'package:flutter_application_1/screens/viajes_screen1.dart';
 import 'package:flutter_application_1/screens/viajes_screen3.dart';
 import 'package:flutter_application_1/utils/global_values.dart';
+import 'package:flutter_application_1/utils/notification_service.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationService().initialize();
   
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform

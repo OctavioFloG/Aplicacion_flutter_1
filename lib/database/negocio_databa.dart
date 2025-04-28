@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/utils/notification_service.dart';
 import 'package:sqflite/sqflite.dart';
 
 class NegocioDataba {
@@ -9,13 +10,13 @@ class NegocioDataba {
     if (_database != null) return _database!;
     return _database = await initDatabase();
   }
-  
+
   Future<Database?> initDatabase() async {
     String path = await getDatabasesPath() + NAMEDB;
     return openDatabase(
       path,
       version: VERSIONDB,
-      onCreate: (db, version) async{
+      onCreate: (db, version) async {
         await db.execute('''CREATE TABLE categoria (
           idCategoria INTEGER PRIMARY KEY,
           nombre VARCHAR(50) NOT NULL
@@ -45,11 +46,11 @@ class NegocioDataba {
   }
 
   // Datos de prueba
-  
+
   Future<void> _insertarDatosPrueba(Database db) async {
     // Función auxiliar para formatear fecha
     String formatDate(DateTime date) {
-      return "${date.year}-${date.month.toString().padLeft(2,'0')}-${date.day.toString().padLeft(2,'0')}";
+      return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     }
 
     // Insertar categorías
@@ -85,12 +86,26 @@ class NegocioDataba {
 
   Future<int> insertVenta(Map<String, dynamic> row) async {
     Database? db = await database;
-    return await db!.insert('venta', row);
+    int entrega = await db!.insert('venta', row);
+
+    // Notificación
+    if (row['status'] == 'porCumplir') {
+      final notificationService = NotificationService();
+      await notificationService.scheduleVentaNotification(
+        entrega,
+        'Recordatorio de Entrega',
+        'La entrega #$entrega está programada para dentro de 2 días',
+        DateTime.parse(row['fecha_entrega']),
+      );
+    }
+
+    return entrega;
   }
 
   Future<int> updateVenta(Map<String, dynamic> row) async {
     Database? db = await database;
-    return await db!.update('venta', row, where: 'idVenta = ?', whereArgs: [row['idVenta']]);
+    return await db!.update('venta', row,
+        where: 'idVenta = ?', whereArgs: [row['idVenta']]);
   }
 
   Future<int> deleteVenta(int id) async {
@@ -122,13 +137,15 @@ class NegocioDataba {
 
   Future<int> updateProducto(Map<String, dynamic> row) async {
     Database? db = await database;
-    return await db!.update('producto', row, where: 'idProducto = ?', whereArgs: [row['idProducto']]);
+    return await db!.update('producto', row,
+        where: 'idProducto = ?', whereArgs: [row['idProducto']]);
   }
 
   Future<int> deleteProducto(int id) async {
     Database? db = await database;
-    return await db!.delete('producto', where: 'idProducto = ?', whereArgs: [id]);
-  } 
+    return await db!
+        .delete('producto', where: 'idProducto = ?', whereArgs: [id]);
+  }
 
   // CRUD de categoría
 
@@ -144,21 +161,18 @@ class NegocioDataba {
 
   Future<int> updateCategoria(Map<String, dynamic> row) async {
     Database? db = await database;
-    return await db!.update('categoria', row, 
-      where: 'idCategoria = ?', 
-      whereArgs: [row['idCategoria']]
-    );
+    return await db!.update('categoria', row,
+        where: 'idCategoria = ?', whereArgs: [row['idCategoria']]);
   }
 
   Future<int> deleteCategoria(int id) async {
     Database? db = await database;
-    return await db!.delete('categoria', 
-      where: 'idCategoria = ?', 
-      whereArgs: [id]
-    );
+    return await db!
+        .delete('categoria', where: 'idCategoria = ?', whereArgs: [id]);
   }
 
-  Future<List<Map<String, dynamic>>> getProductosByCategoria(int categoriaId) async {
+  Future<List<Map<String, dynamic>>> getProductosByCategoria(
+      int categoriaId) async {
     Database? db = await database;
     return await db!.query(
       'producto',
