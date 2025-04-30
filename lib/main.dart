@@ -18,7 +18,6 @@ import 'package:flutter_application_1/screens/viajes_screen3.dart';
 import 'package:flutter_application_1/utils/global_values.dart';
 import 'package:flutter_application_1/utils/notification_service.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
