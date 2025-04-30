@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firebase_options.dart';
 import 'package:flutter_application_1/screens/dashboard_screen.dart';
 import 'package:flutter_application_1/screens/detail_popular_screen.dart';
+import 'package:flutter_application_1/screens/google_map_screen.dart';
 import 'package:flutter_application_1/screens/list_students_screen.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
 import 'package:flutter_application_1/screens/negocio_screen.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_application_1/screens/viajes_screen3.dart';
 import 'package:flutter_application_1/utils/global_values.dart';
 import 'package:flutter_application_1/utils/notification_service.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,7 +76,7 @@ class MyApp extends StatelessWidget {
             '/viajes2': (context) => const ViajesScreen2(),
             '/viajes3': (context) => const ViajesScreen3(),
             '/negocio': (context) => NegocioScreen(),
-
+            '/map': (context) => GoogleMapScreen(),
           },
         );
       },

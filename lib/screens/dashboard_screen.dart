@@ -105,6 +105,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onTap: () => Navigator.pushNamed(context, "/negocio"),
             ),
             ListTile(
+              title: Text("Google Map"),
+              subtitle: Text("Pantalla para trabajar con el mapa de google"),
+              leading: Icon(Icons.map),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () => Navigator.pushNamed(context, "/map"),
+            ),
+            ListTile(
               title: Text("Popular TheMovieDB"),
               subtitle: Text("Práctica consumo de API"),
               leading: Icon(Icons.movie),
