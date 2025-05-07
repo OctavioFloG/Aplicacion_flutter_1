@@ -36,7 +36,6 @@ class NotificationService {
 
   Future<void> _requestPermissions() async {
     if (!kIsWeb) {
-      // Solicitar permisos para Android 13 (API level 33) y superior
       final platform = notificationPlugin
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
@@ -78,10 +77,12 @@ class NotificationService {
     String descripcion,
     DateTime fechaEntrega,
   ) async {
-    // Calcular fecha 2 días antes
-    final fechaNotificacion = fechaEntrega.subtract(const Duration(days: 2));
+    // Notificacion 2 días antes
+    // final fechaNotificacion = fechaEntrega.subtract(const Duration(days: 2));
     
-    // Solo programar si la fecha es futura
+    // Notificación 1 minuto después
+    final fechaNotificacion = DateTime.now().add(const Duration(minutes: 1));
+    
     if (fechaNotificacion.isAfter(DateTime.now())) {
       await notificationPlugin.zonedSchedule(
         idVenta,
@@ -95,30 +96,27 @@ class NotificationService {
   }
 
   // Método de prueba para notificación rápida
-  // Future<void> testNotification() async {
-  //   try {
-  //     final fechaNotificacion = DateTime.now().add(const Duration(minutes: 1));
+  Future<void> testNotification() async {
+    try {
+      final fechaNotificacion = DateTime.now().add(const Duration(minutes: 1));
       
-  //     // Inicializar antes de programar la notificación
-  //     await initialize();
+      await initialize();
       
-  //     await notificationPlugin.zonedSchedule(
-  //       0,
-  //       'Notificación de Prueba',
-  //       'Esta es una notificación de prueba (1 minuto)',
-  //       tz.TZDateTime.from(fechaNotificacion, tz.local),
-  //       notificationDetails(),
-  //       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-  //     );
+      await notificationPlugin.zonedSchedule(
+        0,
+        'Notificación de Prueba',
+        'Esta es una notificación de prueba (1 minuto)',
+        tz.TZDateTime.from(fechaNotificacion, tz.local),
+        notificationDetails(),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
       
-  //     // Usar debugPrint en lugar de escribir en archivo
-  //     debugPrint('✅ Notificación programada exitosamente');
-  //     debugPrint('📅 Fecha programada: ${fechaNotificacion.toString()}');
-  //   } catch (e, stackTrace) {
-  //     // Logging mejorado de errores
-  //     debugPrint('❌ Error al programar la notificación:');
-  //     debugPrint('Error: $e');
-  //     debugPrint('Stack trace: $stackTrace');
-  //   }
-  // }
+      debugPrint('✅ Notificación programada exitosamente');
+      debugPrint('📅 Fecha programada: ${fechaNotificacion.toString()}');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error al programar la notificación:');
+      debugPrint('Error: $e');
+      debugPrint('Stack trace: $stackTrace');
+    }
+  }
 }

@@ -180,4 +180,22 @@ class NegocioDataba {
       whereArgs: [categoriaId],
     );
   }
+
+  Future<Map<String, dynamic>> getProducto(int id) async {
+    Database? db = await database;
+    List<Map<String, dynamic>> result = await db!.query(
+      'producto',
+      where: 'idProducto = ?',
+      whereArgs: [id],
+    );
+    return result.first;
+  }
+
+  Future<int?> getLastVentaId() async {
+    Database? db = await database;
+    final List<Map<String, dynamic>> result = await db!.rawQuery(
+      'SELECT last_insert_rowid() as lastId'
+    );
+    return result.first['lastId'] as int;
+  }
 }

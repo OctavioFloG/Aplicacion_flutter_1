@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/categoria_model.dart';
 import 'package:flutter_application_1/models/producto_model.dart';
-// import 'package:flutter_application_1/utils/notification_service.dart';
+import 'package:badges/badges.dart' as badges;
+import 'package:flutter_application_1/utils/notification_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/database/negocio_databa.dart';
@@ -233,48 +234,97 @@ class _NegocioScreenState extends State<NegocioScreen> {
   }
 
   // Modal de la venta
-  void _mostrarDetalleVenta(BuildContext context, VentaModel venta) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Detalle de Entrega #${venta.idVenta}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Producto ID: ${venta.idProducto}'),
-            Text('Cantidad: ${venta.cantidad}'),
-            Text('Fecha de Venta: ${venta.fechaVenta}'),
-            Text('Fecha de Entrega: ${venta.fechaEntrega}'),
-            RichText(
-              text: TextSpan(
-                style: DefaultTextStyle.of(context).style,
-                children: [
-                  TextSpan(text: 'Estado: '),
-                  TextSpan(
-                    text: venta.status.toString().split('.').last,
-                    style: TextStyle(
-                      color: venta.status.toString() == 'EstadoVenta.porCumplir'
-                          ? Colors.green
-                          : venta.status.toString() == 'EstadoVenta.completado'
-                              ? Colors.grey
-                              : Colors.red,
-                      fontWeight: FontWeight.bold,
+  void _mostrarDetalleVenta(BuildContext context, VentaModel venta) async {
+    try {
+      // Obtener los detalles del producto
+      final productoData = await _db.getProducto(venta.idProducto!);
+      final producto = ProductoModel.fromMap(productoData);
+      
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Detalle de Entrega #${venta.idVenta}'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Producto:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Nombre: ${producto.nombre ?? "Sin nombre"}'),
+                        Text('Precio: \$${producto.precio?.toStringAsFixed(2) ?? "0.00"}'),
+                        Text('Stock disponible: ${producto.stock ?? 0}'),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                SizedBox(height: 16),
+                Text('Detalles de la venta:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Cantidad: ${venta.cantidad ?? 0}'),
+                        Text('Total: \$${((venta.cantidad ?? 0) * (producto.precio ?? 0)).toStringAsFixed(2)}'),
+                        Text('Fecha de Venta: ${venta.fechaVenta ?? "No disponible"}'),
+                        Text('Fecha de Entrega: ${venta.fechaEntrega ?? "No disponible"}'),
+                        RichText(
+                          text: TextSpan(
+                            style: DefaultTextStyle.of(context).style,
+                            children: [
+                              TextSpan(text: 'Estado: '),
+                              TextSpan(
+                                text: venta.status.toString().split('.').last,
+                                style: TextStyle(
+                                  color: venta.status.toString() == 'EstadoVenta.porCumplir'
+                                      ? Colors.green
+                                      : venta.status.toString() == 'EstadoVenta.completado'
+                                          ? Colors.grey
+                                          : Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cerrar'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cerrar'),
-          ),
-        ],
-      ),
-    );
+      );
+    } catch (e) {
+      // Mostrar un diálogo de error si algo falla
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('No se pudo cargar los detalles del producto'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cerrar'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   // Modal de confirmación de eliminación de una venta
@@ -470,51 +520,79 @@ class _NegocioScreenState extends State<NegocioScreen> {
 
                     if (_selectedProductoId != null) ...[
                       SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Cantidad: '),
-                          IconButton(
-                            icon: Icon(Icons.remove_circle),
-                            color: Colors.red,
-                            onPressed: () {
-                              setDialogState(() {
-                                int cantidad =
-                                    int.tryParse(_cantidadController.text) ?? 0;
-                                if (cantidad > 1) {
-                                  _cantidadController.text =
-                                      (cantidad - 1).toString();
-                                }
-                              });
-                            },
-                          ),
-                          Container(
-                            width: 50,
-                            child: Text(
-                              _cantidadController.text.isEmpty
-                                  ? '1'
-                                  : _cantidadController.text,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 18),
+                      Builder(
+                        builder: (context) {
+                          ProductoModel producto = _productos.firstWhere(
+                            (p) => p.idProducto == _selectedProductoId
+                          );
+                          
+                          int cantidad = int.tryParse(_cantidadController.text) ?? 1;
+                          double total = (producto.precio ?? 0) * cantidad;
+                          
+                          return Card(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Stock disponible: ${producto.stock}',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text('Cantidad: '),
+                                      IconButton(
+                                        icon: Icon(Icons.remove_circle),
+                                        color: Colors.red,
+                                        onPressed: () {
+                                          setDialogState(() {
+                                            int cantidad = int.tryParse(_cantidadController.text) ?? 0;
+                                            if (cantidad > 1) {
+                                              _cantidadController.text = (cantidad - 1).toString();
+                                            }
+                                          });
+                                        },
+                                      ),
+                                      badges.Badge(
+                                        badgeContent: Text(
+                                          _cantidadController.text.isEmpty ? '1' : _cantidadController.text,
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        badgeStyle: badges.BadgeStyle(
+                                          shape: badges.BadgeShape.circle,
+                                          padding: EdgeInsets.all(12),
+                                          badgeColor: Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.add_circle),
+                                        color: Colors.green,
+                                        onPressed: () {
+                                          setDialogState(() {
+                                            int cantidad = int.tryParse(_cantidadController.text) ?? 0;
+                                            if (cantidad < (producto.stock ?? 0)) {
+                                              _cantidadController.text = (cantidad + 1).toString();
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Total: \$${total.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.add_circle),
-                            color: Colors.green,
-                            onPressed: () {
-                              setDialogState(() {
-                                int cantidad =
-                                    int.tryParse(_cantidadController.text) ?? 0;
-                                ProductoModel producto = _productos.firstWhere(
-                                    (p) => p.idProducto == _selectedProductoId);
-                                if (cantidad < (producto.stock ?? 0)) {
-                                  _cantidadController.text =
-                                      (cantidad + 1).toString();
-                                }
-                              });
-                            },
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ],
 
@@ -577,9 +655,32 @@ class _NegocioScreenState extends State<NegocioScreen> {
                         'status': 'porCumplir',
                       };
 
-                      await _db.insertVenta(nuevaVenta);
+                      // Registrar la venta y obtener su ID
+                      final idVenta = await _db.insertVenta(nuevaVenta);
+                      
+                      // Programar notificación para la nueva venta
+                      final notificationService = NotificationService();
+                      await notificationService.initialize();
+                      final fechaEntrega = DateTime.parse(nuevaVenta['fecha_entrega'] as String);
+                      
+                      await notificationService.scheduleVentaNotification(
+                        idVenta,
+                        'Recordatorio de Entrega',
+                        'La entrega #$idVenta está programada para ${DateFormat('dd/MM/yyyy').format(fechaEntrega)}',
+                        fechaEntrega,
+                      );
+                      
                       await _cargarDatos();
                       Navigator.pop(context);
+
+                      // Mostrar confirmación de notificación
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Venta registrada y notificación programada'),
+                          duration: Duration(seconds: 2),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
                     }
                   },
                   child: Text('Guardar'),
@@ -639,24 +740,56 @@ class _NegocioScreenState extends State<NegocioScreen> {
             });
           },
         ),
-        // BOTON PARA PROBAR LA NOTIFICACION RÁPIDA
-        // IconButton(
-        //   icon: Icon(Icons.notification_add),
-        //   onPressed: () async {
-        //     final notificationService = NotificationService();
-        //     await notificationService.initialize();
-        //     await notificationService.testNotification();
+        // Botón para probar notificación con venta
+        IconButton(
+          icon: Icon(Icons.notification_add),
+          onPressed: () async {
+            // Obtener la primera venta pendiente
+            final ventas = await _db.getVentasByStatus('porCumplir');
+            if (ventas.isNotEmpty) {
+              final venta = VentaModel.fromMap(ventas.last);
+              final fechaEntrega = DateTime.parse(venta.fechaEntrega!);
+              
+              // Solo programar si la fecha de entrega es futura
+              if (fechaEntrega.isAfter(DateTime.now())) {
+                final notificationService = NotificationService();
+                await notificationService.initialize();
+                
+                await notificationService.scheduleVentaNotification(
+                  venta.idVenta!,
+                  'Recordatorio de Entrega',
+                  'La entrega #${venta.idVenta} está programada para ${DateFormat('dd/MM/yyyy').format(fechaEntrega)}',
+                  fechaEntrega,
+                );
 
-        //     // Mostrar un SnackBar para confirmar
-        //     ScaffoldMessenger.of(context).showSnackBar(
-        //       SnackBar(
-        //         content: Text('Notificación programada para 1 minuto'),
-        //         duration: Duration(seconds: 2),
-        //         backgroundColor: Colors.green,
-        //       ),
-        //     );
-        //   },
-        // ),
+                // Mostrar confirmación
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Notificación programada para 2 días antes de la entrega #${venta.idVenta}'),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('La fecha de entrega ya pasó'),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('No hay ventas pendientes para notificar'),
+                  duration: Duration(seconds: 2),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+        ),
         IconButton(
           icon: Icon(_showCalendar ? Icons.list : Icons.calendar_today),
           onPressed: () {
